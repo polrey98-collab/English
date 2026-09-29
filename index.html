@@ -2,832 +2,441 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EN Tracker">
+<meta name="apple-mobile-web-app-title" content="EN C1">
 <meta name="theme-color" content="#1a1a2e">
-<title>EN Tracker — Pol</title>
+<meta name="description" content="Plan y tracker personal de inglés: camino al C1.">
+<title>EN Tracker — Camino al C1</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #faf8f5;
-    --bg-card: #ffffff;
-    --bg-card-alt: #f5f2ed;
-    --text-1: #1a1a2e;
-    --text-2: #6b6880;
-    --text-3: #a09dae;
-    --accent: #5b4cdb;
-    --accent-light: #ede9ff;
-    --green: #2cb67d;
-    --green-light: #e4f9ef;
-    --amber: #e59f17;
-    --amber-light: #fef6e0;
-    --red: #e05263;
-    --red-light: #fde8eb;
-    --border: #eceaE5;
-    --shadow: 0 2px 16px rgba(26,26,46,0.06);
-    --shadow-lg: 0 8px 32px rgba(26,26,46,0.1);
-    --radius: 16px;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'DM Sans', -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text-1);
-    min-height: 100vh;
-    overflow-x: hidden;
-    padding-top: var(--safe-top);
-    padding-bottom: calc(72px + var(--safe-bottom));
-  }
-
-  /* ========== NAV ========== */
-  .nav {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex; justify-content: space-around; align-items: center;
-    padding: 8px 0 calc(8px + var(--safe-bottom));
-  }
-  .nav-btn {
-    border: none; background: none; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 2px;
-    padding: 6px 16px; border-radius: 12px; transition: all 0.2s;
-    font-family: inherit;
-  }
-  .nav-btn svg { width: 24px; height: 24px; stroke: var(--text-3); stroke-width: 1.8; fill: none; transition: all 0.2s; }
-  .nav-btn span { font-size: 10px; font-weight: 600; color: var(--text-3); transition: all 0.2s; }
-  .nav-btn.active svg { stroke: var(--accent); }
-  .nav-btn.active span { color: var(--accent); }
-  .nav-btn.active { background: var(--accent-light); }
-
-  /* ========== PAGES ========== */
-  .page { display: none; padding: 20px 16px 24px; animation: fadeUp 0.3s ease; }
-  .page.active { display: block; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* ========== HEADER ========== */
-  .header {
-    background: linear-gradient(135deg, #1a1a2e 0%, #2d2b55 60%, #5b4cdb 100%);
-    padding: 28px 20px 24px;
-    color: #fff;
-    position: relative; overflow: hidden;
-  }
-  .header::after {
-    content: ''; position: absolute; top: -40px; right: -30px;
-    width: 160px; height: 160px; border-radius: 50%;
-    background: rgba(255,255,255,0.04);
-  }
-  .header-date { font-size: 12px; opacity: 0.6; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-  .header-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 800; margin-bottom: 2px; }
-  .header-sub { font-size: 13px; opacity: 0.7; }
-
-  /* ========== STREAK BAR ========== */
-  .streak-bar {
-    display: flex; justify-content: center; gap: 12px;
-    padding: 16px 20px; background: var(--bg-card);
-    margin: -12px 16px 16px; border-radius: var(--radius);
-    box-shadow: var(--shadow-lg); position: relative; z-index: 1;
-  }
-  .streak-item { text-align: center; }
-  .streak-num { font-size: 24px; font-weight: 800; color: var(--accent); line-height: 1; }
-  .streak-num.green { color: var(--green); }
-  .streak-num.amber { color: var(--amber); }
-  .streak-label { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-  .streak-div { width: 1px; background: var(--border); }
-
-  /* ========== CARDS ========== */
-  .card {
-    background: var(--bg-card);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    box-shadow: var(--shadow);
-    margin-bottom: 12px;
-  }
-  .card-title { font-size: 14px; font-weight: 700; color: var(--text-1); margin-bottom: 12px; }
-
-  /* ========== TOOL BUTTONS ========== */
-  .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .tool-btn {
-    border: 2px solid var(--border); background: var(--bg-card);
-    border-radius: 14px; padding: 14px 12px; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    transition: all 0.25s cubic-bezier(0.22,1,0.36,1);
-    position: relative; overflow: hidden;
-    font-family: inherit;
-  }
-  .tool-btn::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, var(--accent), #7c6cff);
-    opacity: 0; transition: opacity 0.25s;
-  }
-  .tool-btn.done { border-color: var(--green); background: var(--green-light); }
-  .tool-btn.done::before { opacity: 0; }
-  .tool-btn .tool-icon { font-size: 22px; position: relative; z-index: 1; }
-  .tool-btn .tool-name { font-size: 12px; font-weight: 700; position: relative; z-index: 1; color: var(--text-1); }
-  .tool-btn .tool-time { font-size: 10px; color: var(--text-3); position: relative; z-index: 1; }
-  .tool-btn.done .tool-name { color: var(--green); }
-  .tool-btn.done .tool-check {
-    position: absolute; top: 8px; right: 8px;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: var(--green); display: flex; align-items: center; justify-content: center;
-    animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .tool-btn.done .tool-check svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 3; fill: none; }
-  @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
-
-  .tool-btn:active { transform: scale(0.96); }
-
-  /* ========== WEEK GRID ========== */
-  .week-scroll { overflow-x: auto; padding-bottom: 4px; }
-  .week-grid { display: flex; gap: 6px; min-width: max-content; }
-  .week-day {
-    width: 46px; text-align: center; padding: 10px 4px; border-radius: 12px;
-    background: var(--bg-card-alt); transition: all 0.2s;
-  }
-  .week-day.today { background: var(--accent); color: #fff; box-shadow: 0 4px 16px rgba(91,76,219,0.3); }
-  .week-day.has-data { background: var(--green-light); }
-  .week-day.today.has-data { background: var(--green); }
-  .week-day-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-  .week-day.today .week-day-name { color: rgba(255,255,255,0.7); }
-  .week-day-num { font-size: 18px; font-weight: 800; margin: 4px 0; }
-  .week-day-dots { display: flex; gap: 3px; justify-content: center; min-height: 8px; flex-wrap: wrap; }
-  .week-day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
-  .week-day.today .week-day-dot { background: rgba(255,255,255,0.8); }
-
-  /* ========== PLAN VS ACTUAL ========== */
-  .plan-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 0; border-bottom: 1px solid var(--border);
-  }
-  .plan-row:last-child { border: none; }
-  .plan-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .plan-dot.done { background: var(--green); }
-  .plan-dot.missed { background: var(--border); }
-  .plan-dot.pending { background: var(--amber); }
-  .plan-tool { font-size: 13px; font-weight: 600; flex: 1; }
-  .plan-time { font-size: 11px; color: var(--text-3); }
-  .plan-status { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
-  .plan-status.done { background: var(--green-light); color: var(--green); }
-  .plan-status.missed { background: var(--bg-card-alt); color: var(--text-3); }
-  .plan-status.pending { background: var(--amber-light); color: var(--amber); }
-
-  /* ========== STATS ========== */
-  .stat-ring-wrap { display: flex; justify-content: center; margin: 16px 0; }
-  .stat-ring { position: relative; width: 140px; height: 140px; }
-  .stat-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .stat-ring circle { fill: none; stroke-width: 10; stroke-linecap: round; }
-  .stat-ring .ring-bg { stroke: var(--border); }
-  .stat-ring .ring-fg { stroke: var(--accent); transition: stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1); }
-  .stat-ring-label {
-    position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-  }
-  .stat-ring-pct { font-size: 32px; font-weight: 800; color: var(--accent); line-height: 1; }
-  .stat-ring-sub { font-size: 11px; color: var(--text-3); font-weight: 600; }
-
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .stat-box { background: var(--bg-card-alt); border-radius: 12px; padding: 14px; text-align: center; }
-  .stat-box-num { font-size: 22px; font-weight: 800; color: var(--text-1); line-height: 1; }
-  .stat-box-label { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
-
-  /* ========== HEATMAP ========== */
-  .heatmap { display: flex; flex-wrap: wrap; gap: 3px; justify-content: flex-start; }
-  .heat-cell {
-    width: 14px; height: 14px; border-radius: 3px;
-    background: var(--border);
-  }
-  .heat-cell.l1 { background: #c4b5fd; }
-  .heat-cell.l2 { background: #8b5cf6; }
-  .heat-cell.l3 { background: #6d28d9; }
-  .heat-cell.l4 { background: var(--accent); }
-
-  /* ========== CONFIG ========== */
-  .config-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 0; border-bottom: 1px solid var(--border);
-  }
-  .config-row:last-child { border: none; }
-  .config-label { font-size: 14px; font-weight: 600; }
-  .config-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
-  .config-btn {
-    border: none; padding: 8px 18px; border-radius: 10px; cursor: pointer;
-    font-family: inherit; font-size: 12px; font-weight: 700;
-    background: var(--accent-light); color: var(--accent);
-    transition: all 0.2s;
-  }
-  .config-btn:active { transform: scale(0.96); }
-  .config-btn.danger { background: var(--red-light); color: var(--red); }
-  .config-btn.green { background: var(--green-light); color: var(--green); }
-
-  /* ========== TOAST ========== */
-  .toast {
-    position: fixed; top: calc(20px + var(--safe-top)); left: 50%; transform: translateX(-50%) translateY(-100px);
-    background: var(--text-1); color: #fff; padding: 10px 20px;
-    border-radius: 12px; font-size: 13px; font-weight: 600;
-    z-index: 200; transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: var(--shadow-lg);
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* ========== MODAL ========== */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-    z-index: 150; display: none; align-items: flex-end; justify-content: center;
-    backdrop-filter: blur(4px);
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--bg-card); border-radius: 20px 20px 0 0;
-    padding: 24px 20px calc(24px + var(--safe-bottom)); width: 100%; max-width: 480px;
-    animation: slideUp 0.3s cubic-bezier(0.22,1,0.36,1);
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
-  .modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 12px; }
-  .modal p { font-size: 13px; color: var(--text-2); line-height: 1.5; margin-bottom: 16px; }
-  .modal-actions { display: flex; gap: 8px; }
-  .modal-actions button {
-    flex: 1; padding: 12px; border: none; border-radius: 12px;
-    font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
-  }
-  .btn-cancel { background: var(--bg-card-alt); color: var(--text-2); }
-  .btn-confirm { background: var(--red); color: #fff; }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <!-- HEADER -->
-<div class="header">
-  <div class="header-date" id="headerDate"></div>
-  <div class="header-title">EN Tracker</div>
-  <div class="header-sub">B1 → B2 · Plan de inglés</div>
-</div>
+<header class="header">
+  <div class="wrap">
+    <div class="header-date" id="headerDate"></div>
+    <div class="header-title">EN Tracker</div>
+    <div class="header-sub">B2 → C1 · <span id="phaseLabel"></span></div>
+  </div>
+</header>
 
 <!-- STREAK BAR -->
-<div class="streak-bar">
-  <div class="streak-item">
-    <div class="streak-num" id="streakCurrent">0</div>
-    <div class="streak-label">Racha</div>
-  </div>
-  <div class="streak-div"></div>
-  <div class="streak-item">
-    <div class="streak-num green" id="streakBest">0</div>
-    <div class="streak-label">Mejor</div>
-  </div>
-  <div class="streak-div"></div>
-  <div class="streak-item">
-    <div class="streak-num amber" id="totalSessions">0</div>
-    <div class="streak-label">Sesiones</div>
-  </div>
-</div>
-
-<!-- PAGE: HOY -->
-<div class="page active" id="pageHoy">
-  <div class="card">
-    <div class="card-title">¿Qué has hecho hoy?</div>
-    <div class="tools-grid" id="toolsGrid"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Plan de hoy</div>
-    <div id="todayPlan"></div>
-  </div>
-  <div class="card" style="background: var(--accent-light); border: 1px solid #d4ccff;">
-    <div style="font-size: 12px; color: var(--accent); font-weight: 600; line-height: 1.5;">
-      💡 <strong>Día malo =</strong> solo 5 min de Anki. La racha siempre vale más que la sesión perfecta.
+<div class="wrap">
+  <div class="streak-bar">
+    <div class="streak-item">
+      <div class="streak-num" id="streakCurrent">0</div>
+      <div class="streak-label">Racha</div>
+    </div>
+    <div class="streak-div"></div>
+    <div class="streak-item">
+      <div class="streak-num green" id="streakBest">0</div>
+      <div class="streak-label">Mejor</div>
+    </div>
+    <div class="streak-div"></div>
+    <div class="streak-item">
+      <div class="streak-num amber" id="totalHours">0</div>
+      <div class="streak-label">Horas</div>
     </div>
   </div>
 </div>
 
-<!-- PAGE: SEMANA -->
-<div class="page" id="pageSemana">
-  <div class="card">
-    <div class="card-title">Esta semana</div>
-    <div class="week-scroll"><div class="week-grid" id="weekGrid"></div></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Detalle del día seleccionado</div>
-    <div id="dayDetail"><p style="font-size:13px;color:var(--text-3)">Pulsa un día para ver el detalle</p></div>
-  </div>
-</div>
+<main class="wrap">
 
-<!-- PAGE: STATS -->
-<div class="page" id="pageStats">
-  <div class="card">
-    <div class="card-title">Adherencia esta semana</div>
-    <div class="stat-ring-wrap">
-      <div class="stat-ring">
-        <svg viewBox="0 0 140 140">
-          <circle class="ring-bg" cx="70" cy="70" r="60"/>
-          <circle class="ring-fg" id="ringFg" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="377"/>
-        </svg>
-        <div class="stat-ring-label">
-          <div class="stat-ring-pct" id="adherencePct">0%</div>
-          <div class="stat-ring-sub">completado</div>
+  <!-- ===================== HOY ===================== -->
+  <section class="page active" id="pageHoy">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Plan de hoy</div>
+        <div class="card-meta" id="todayPlanMeta"></div>
+      </div>
+      <div id="todayPlan"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Repaso de tarjetas</div>
+        <div class="card-meta" id="reviewMeta"></div>
+      </div>
+      <div id="reviewTeaser"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Reto del día</div>
+        <button class="link-btn" id="challengeNext" type="button">Otro ↻</button>
+      </div>
+      <div class="seg" id="challengeTabs" role="tablist">
+        <button type="button" data-tab="speak" class="active">🗣️ Speaking</button>
+        <button type="button" data-tab="self">💭 Self-talk</button>
+        <button type="button" data-tab="write">✍️ Writing</button>
+      </div>
+      <div id="challengeBody"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Frase del día</div>
+      </div>
+      <div id="phraseOfDay"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Registrar actividad</div>
+        <div class="card-meta">toca para anotar minutos</div>
+      </div>
+      <div class="tools-grid" id="toolsGrid"></div>
+    </div>
+
+    <div class="card tip">
+      💡 <strong>Día malo =</strong> 5 minutos de repaso o de Anki. La racha vale más que la sesión perfecta.
+      <br>🧠 <strong>Regla de oro:</strong> nunca traduzcas; si falta una palabra, descríbela en inglés.
+    </div>
+  </section>
+
+  <!-- ===================== REPASO ===================== -->
+  <section class="page" id="pageRepaso">
+    <div class="chips" id="catChips"></div>
+    <div class="card study" id="studyArea"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">📝 Mis frases</div>
+        <div class="card-meta" id="mineCount"></div>
+      </div>
+      <p class="muted small">Anota aquí cada corrección de tu profesor, de la IA o tus errores repetidos. Entran en el repaso desde hoy.</p>
+      <form id="mineForm" class="form" autocomplete="off">
+        <label>Frase o pregunta <span class="muted">(p. ej. tu error)</span>
+          <textarea id="mineFront" rows="2" required placeholder="I have 30 years."></textarea>
+        </label>
+        <label>Versión correcta
+          <textarea id="mineBack" rows="2" required placeholder="I'm 30 years old."></textarea>
+        </label>
+        <label>Nota <span class="muted">(opcional, mejor en inglés)</span>
+          <input id="mineNote" type="text" placeholder="Use 'be' for age.">
+        </label>
+        <button class="btn primary" type="submit">Añadir al repaso</button>
+      </form>
+      <div id="mineList" class="mine-list"></div>
+    </div>
+  </section>
+
+  <!-- ===================== PROGRESO ===================== -->
+  <section class="page" id="pageProgreso">
+    <div class="card">
+      <div class="card-title">Camino al C1</div>
+      <div id="goalBars"></div>
+      <div id="phaseTrack"></div>
+      <div class="eta" id="eta"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Semana</div>
+        <div class="week-nav">
+          <button class="icon-btn" id="weekPrev" type="button" aria-label="Semana anterior">‹</button>
+          <button class="icon-btn" id="weekNext" type="button" aria-label="Semana siguiente">›</button>
         </div>
       </div>
+      <div class="week-grid" id="weekGrid"></div>
+      <div class="week-summary" id="weekSummary"></div>
+      <div id="dayDetail"></div>
     </div>
-  </div>
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div class="stat-box-num" id="statItalki">0</div>
-      <div class="stat-box-label">italki total</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-box-num" id="statTalkpal">0</div>
-      <div class="stat-box-label">TalkPal total</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-box-num" id="statAnki">0</div>
-      <div class="stat-box-label">Anki total</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-box-num" id="statPodcast">0</div>
-      <div class="stat-box-label">Podcast total</div>
-    </div>
-  </div>
-  <div class="card" style="margin-top:12px">
-    <div class="card-title">Actividad (últimos 60 días)</div>
-    <div class="heatmap" id="heatmap"></div>
-  </div>
-</div>
 
-<!-- PAGE: CONFIG -->
-<div class="page" id="pageConfig">
-  <div class="card">
-    <div class="card-title">Datos</div>
-    <div class="config-row">
-      <div>
-        <div class="config-label">Exportar datos</div>
-        <div class="config-sub">Descargar JSON con todo tu historial</div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Tests de nivel</div>
+        <button class="config-btn" id="addTestBtn" type="button">+ Añadir</button>
       </div>
-      <button class="config-btn green" onclick="exportData()">Exportar</button>
+      <p class="muted small">Haz el <a href="https://www.efset.org/" target="_blank" rel="noopener">EF SET</a> gratis (50 min) cada 3 meses y apunta la nota.</p>
+      <div id="testsList"></div>
     </div>
-    <div class="config-row">
-      <div>
-        <div class="config-label">Importar datos</div>
-        <div class="config-sub">Restaurar desde un archivo JSON</div>
+
+    <div class="card">
+      <div class="card-title">Tarjetas</div>
+      <div class="stats-grid" id="deckStats"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Horas por actividad</div>
+      <div id="toolBars"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Actividad · últimas 16 semanas</div>
+      <div class="heatmap" id="heatmap"></div>
+      <div class="heat-legend">menos <span class="heat-cell"></span><span class="heat-cell l1"></span><span class="heat-cell l2"></span><span class="heat-cell l3"></span><span class="heat-cell l4"></span> más</div>
+    </div>
+  </section>
+
+  <!-- ===================== PLAN ===================== -->
+  <section class="page" id="pagePlan">
+    <div class="card">
+      <div class="card-title">Las 3 fases</div>
+      <div id="phaseList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="weekPlanTitle">Tu semana</div>
+      <div id="weekPlanTable"></div>
+      <p class="muted small" style="margin-top:10px">Bloques de 30 minutos como máximo. Cambia el orden si te aburres, pero no los minutos.</p>
+    </div>
+
+    <details class="card" open>
+      <summary>🧠 Cómo pensar en inglés (sin traducir)</summary>
+      <ol class="rules">
+        <li><strong>Diccionario inglés–inglés</strong> (Cambridge u Oxford Learner's). Nunca español–inglés.</li>
+        <li><strong>Anki y las tarjetas, sin español:</strong> frase en contexto + definición o imagen.</li>
+        <li><strong>Self-talk</strong> 5–10 min al día: narra lo que haces en voz alta.</li>
+        <li><strong>Si no sabes una palabra, rodéala:</strong> <em>"the thing you use to…"</em>. Es una destreza C1.</li>
+        <li><strong>Móvil, ordenador y apps en inglés.</strong> Inmersión gratis todo el día.</li>
+        <li><strong>Mucho input comprensible</strong> (entiendes 80–90 %): cientos de horas de podcasts, series y lectura.</li>
+      </ol>
+    </details>
+
+    <details class="card">
+      <summary>🛠️ Cómo hacer cada actividad</summary>
+      <div id="toolGuides"></div>
+    </details>
+
+    <details class="card">
+      <summary>🇪🇸 Tus trampas como hablante de español/catalán</summary>
+      <ul class="rules">
+        <li><strong>Sujeto obligatorio:</strong> <em>It's raining</em>, nunca <em>Is raining</em>.</li>
+        <li><strong>Present perfect vs past simple:</strong> <em>I've lived here since 2015</em> / <em>I saw him yesterday</em>.</li>
+        <li><strong>Falsos amigos:</strong> actually, eventually, assist, sensible, embarrassed… (están en el repaso).</li>
+        <li><strong>Pronunciación:</strong> vocales largas/cortas (<em>ship/sheep</em>, <em>full/fool</em>) y las <em>-ed</em>/<em>-s</em> finales.</li>
+        <li><strong>Tu ventaja catalana:</strong> la /ʃ/ de <em>xarxa</em> = <em>she</em>; la /z/ de <em>casa</em> = <em>busy</em>; la vocal neutra de <em>pare</em> ≈ la schwa /ə/.</li>
+        <li><strong>Tu ventaja latina:</strong> el vocabulario C1 formal (<em>facilitate, consequently, assess</em>) te sonará. ¡Úsalo!</li>
+      </ul>
+    </details>
+
+    <details class="card">
+      <summary>📚 Recursos por nivel</summary>
+      <div class="res">
+        <h4>Podcasts B1–B2</h4>
+        <ul>
+          <li><a href="https://www.bbc.co.uk/learningenglish/" target="_blank" rel="noopener">BBC Learning English</a> — 6 Minute English, The English We Speak</li>
+          <li><a href="https://teacherluke.co.uk/" target="_blank" rel="noopener">Luke's English Podcast</a></li>
+          <li><a href="https://www.allearsenglish.com/" target="_blank" rel="noopener">All Ears English</a></li>
+        </ul>
+        <h4>Podcasts B2–C1 (nativos)</h4>
+        <ul>
+          <li><a href="https://hbr.org/podcasts/ideacast" target="_blank" rel="noopener">HBR IdeaCast</a> — inglés de negocios</li>
+          <li><a href="https://freakonomics.com/" target="_blank" rel="noopener">Freakonomics Radio</a></li>
+          <li>Cualquier podcast de tu sector o de lo que te apasione</li>
+        </ul>
+        <h4>Herramientas</h4>
+        <ul>
+          <li><a href="https://dictionary.cambridge.org/" target="_blank" rel="noopener">Cambridge Dictionary</a> · <a href="https://www.oxfordlearnersdictionaries.com/" target="_blank" rel="noopener">Oxford Learner's</a></li>
+          <li><a href="https://youglish.com/" target="_blank" rel="noopener">YouGlish</a> — escucha cómo se dice una palabra en vídeos reales</li>
+          <li><a href="https://writeandimprove.com/" target="_blank" rel="noopener">Write &amp; Improve</a> (Cambridge) — corrección gratis de textos</li>
+          <li><a href="https://apps.ankiweb.net/" target="_blank" rel="noopener">Anki</a> · <a href="https://www.italki.com/" target="_blank" rel="noopener">italki</a></li>
+        </ul>
       </div>
-      <button class="config-btn" onclick="importData()">Importar</button>
-    </div>
-    <div class="config-row">
-      <div>
-        <div class="config-label">Sync a Google Sheets</div>
-        <div class="config-sub">Enviar datos a tu Sheet de backup</div>
+    </details>
+
+    <details class="card">
+      <summary>🎓 El certificado</summary>
+      <ul class="rules">
+        <li><strong><a href="https://www.cambridgeenglish.org/exams-and-tests/qualifications/advanced/" target="_blank" rel="noopener">Cambridge C1 Advanced (CAE)</a>:</strong> el más reconocido por las empresas en España. No caduca.</li>
+        <li><strong>EOI C1 (Escola Oficial d'Idiomes):</strong> oficial y mucho más barato en Catalunya.</li>
+        <li><strong><a href="https://ielts.org/" target="_blank" rel="noopener">IELTS</a> 7.0+:</strong> si te planteas trabajar fuera.</li>
+        <li>Preséntate cuando saques <strong>61+ en el EF SET</strong> dos veces seguidas.</li>
+      </ul>
+    </details>
+  </section>
+
+  <!-- ===================== AJUSTES ===================== -->
+  <section class="page" id="pageAjustes">
+    <div class="card">
+      <div class="card-title">Plan</div>
+      <div class="config-row">
+        <div><div class="config-label">Inicio del plan C1</div><div class="config-sub">Marca las fases automáticamente</div></div>
+        <input type="date" id="setStart" class="inp">
       </div>
-      <button class="config-btn" onclick="showSyncModal()">Configurar</button>
-    </div>
-    <div class="config-row">
-      <div>
-        <div class="config-label">Borrar todo</div>
-        <div class="config-sub">Eliminar todos los datos</div>
+      <div class="config-row">
+        <div><div class="config-label">Fase</div><div class="config-sub">Automática según la fecha, o fíjala tú</div></div>
+        <select id="setPhase" class="inp">
+          <option value="auto">Automática</option>
+          <option value="1">1 · Consolidar B2</option>
+          <option value="2">2 · B2+ → C1</option>
+          <option value="3">3 · C1 y certificado</option>
+        </select>
       </div>
-      <button class="config-btn danger" onclick="showResetModal()">Borrar</button>
+      <div class="config-row">
+        <div><div class="config-label">Objetivo práctica activa</div><div class="config-sub">Horas (clases, repaso, escritura…)</div></div>
+        <input type="number" id="setGoalPractice" class="inp num" min="50" max="2000" step="10">
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Objetivo input</div><div class="config-sub">Horas (podcasts, series, lectura)</div></div>
+        <input type="number" id="setGoalInput" class="inp num" min="50" max="3000" step="10">
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Tarjetas nuevas al día</div><div class="config-sub">Entre 3 y 20</div></div>
+        <input type="number" id="setNewPerDay" class="inp num" min="3" max="20">
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Acento del audio 🔊</div><div class="config-sub">Voz del navegador</div></div>
+        <select id="setVoice" class="inp">
+          <option value="en-GB">British</option>
+          <option value="en-US">American</option>
+        </select>
+      </div>
     </div>
-  </div>
-  <div class="card">
-    <div class="card-title">Sobre el plan</div>
-    <div style="font-size:12px;color:var(--text-2);line-height:1.6;">
-      <strong>Stack:</strong> italki (~40€) + TalkPal (~5€) + Anki (gratis) + Podcasts (gratis) + ELSA (opcional ~7€) + Drops (gratis)
-      <br><br>
-      <strong>Objetivo:</strong> B2 consolidado en 6 meses
-      <br><br>
-      <strong>Regla TDA:</strong> Nunca >30 min seguidos. Nunca la misma combo 2 días. Día malo = 5 min Anki.
+
+    <div class="card">
+      <div class="card-title">Datos y sincronización</div>
+      <p class="muted small">Los datos se guardan en este dispositivo. Para pasar del móvil al PC (o al revés): <strong>Exportar</strong> en uno e <strong>Importar</strong> en el otro. Se fusionan, no se pierde nada.</p>
+      <div class="config-row">
+        <div><div class="config-label">Exportar</div><div class="config-sub">Descarga un JSON con todo</div></div>
+        <button class="config-btn green" id="exportBtn" type="button">Exportar</button>
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Importar</div><div class="config-sub">Fusiona un JSON (también el antiguo)</div></div>
+        <button class="config-btn" id="importBtn" type="button">Importar</button>
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Google Sheets</div><div class="config-sub">Copia de cada registro a tu Sheet</div></div>
+        <button class="config-btn" id="syncBtn" type="button">Configurar</button>
+      </div>
+      <div class="config-row">
+        <div><div class="config-label">Borrar todo</div><div class="config-sub">No se puede deshacer</div></div>
+        <button class="config-btn danger" id="resetBtn" type="button">Borrar</button>
+      </div>
     </div>
-  </div>
-  <div style="text-align:center;margin-top:16px;font-size:11px;color:var(--text-3);">
-    EN Tracker v1.0 · Hecho con Claude
-  </div>
-</div>
+
+    <div class="card">
+      <div class="card-title">Instalar como app</div>
+      <ul class="rules small">
+        <li><strong>iPhone (Safari):</strong> Compartir → "Añadir a pantalla de inicio".</li>
+        <li><strong>Android (Chrome):</strong> menú ⋮ → "Instalar aplicación".</li>
+        <li><strong>PC (Chrome/Edge):</strong> icono de instalar en la barra de direcciones.</li>
+      </ul>
+      <button class="btn primary" id="installBtn" type="button" hidden>Instalar ahora</button>
+      <p class="muted small">Funciona sin conexión una vez abierta.</p>
+    </div>
+
+    <div class="foot">EN Tracker v2.0 · Camino al C1</div>
+  </section>
+</main>
+
+<!-- TIMER PILL -->
+<button class="timer-pill" id="timerPill" type="button" hidden></button>
 
 <!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- LOG MODAL -->
+<div class="modal-overlay" id="logModal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="logTitle">
+    <div class="modal-handle"></div>
+    <div class="log-head">
+      <span class="log-icon" id="logIcon"></span>
+      <div>
+        <h3 id="logTitle"></h3>
+        <div class="muted small" id="logDate"></div>
+      </div>
+    </div>
+    <p class="log-guide" id="logGuide"></p>
+    <div class="log-label">Minutos</div>
+    <div class="stepper">
+      <button type="button" class="icon-btn" id="logMinus" aria-label="Menos">−</button>
+      <div class="stepper-val"><span id="logMins">0</span> min</div>
+      <button type="button" class="icon-btn" id="logPlus" aria-label="Más">+</button>
+    </div>
+    <div class="chips tight" id="logChips"></div>
+    <div class="timer-box" id="timerBox"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="logRemove" type="button">Quitar</button>
+      <button class="btn-cancel" id="logCancel" type="button">Cancelar</button>
+      <button class="btn-confirm accent" id="logSave" type="button">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEST MODAL -->
+<div class="modal-overlay" id="testModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-handle"></div>
+    <h3>Resultado de test de nivel</h3>
+    <form id="testForm" class="form">
+      <label>Fecha <input type="date" id="testDate" required></label>
+      <label>Nota EF SET (0–100) <input type="number" id="testScore" min="0" max="100" required></label>
+      <label>Nota <span class="muted">(opcional)</span> <input type="text" id="testNote" placeholder="Listening flojo…"></label>
+      <div class="modal-actions">
+        <button class="btn-cancel" type="button" data-close="testModal">Cancelar</button>
+        <button class="btn-confirm accent" type="submit">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- RESET MODAL -->
 <div class="modal-overlay" id="resetModal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-handle"></div>
     <h3>¿Borrar todo?</h3>
-    <p>Se eliminarán todas las sesiones, rachas y estadísticas. Esta acción no se puede deshacer.</p>
+    <p>Se eliminarán sesiones, tarjetas, tests y ajustes. Exporta antes si quieres una copia.</p>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="hideModal('resetModal')">Cancelar</button>
-      <button class="btn-confirm" onclick="resetAll()">Borrar todo</button>
+      <button class="btn-cancel" type="button" data-close="resetModal">Cancelar</button>
+      <button class="btn-confirm" id="resetConfirm" type="button">Borrar todo</button>
     </div>
   </div>
 </div>
 
 <!-- SYNC MODAL -->
 <div class="modal-overlay" id="syncModal">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-handle"></div>
     <h3>Sync con Google Sheets</h3>
-    <p>Pega aquí la URL de tu Apps Script web app. Los datos se enviarán automáticamente cada vez que registres una sesión.</p>
-    <input id="syncUrl" type="url" placeholder="https://script.google.com/..." style="width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:12px;font-family:inherit;font-size:13px;margin-bottom:12px;outline:none;" />
+    <p>Pega la URL de tu Apps Script web app. Cada registro se enviará automáticamente. Déjalo vacío para desactivarlo.</p>
+    <input id="syncUrl" type="url" class="inp wide" placeholder="https://script.google.com/...">
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="hideModal('syncModal')">Cancelar</button>
-      <button class="btn-confirm" style="background:var(--accent)" onclick="saveSyncUrl()">Guardar</button>
+      <button class="btn-cancel" type="button" data-close="syncModal">Cancelar</button>
+      <button class="btn-confirm accent" id="syncSave" type="button">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- IMPORT INPUT -->
-<input type="file" id="fileInput" accept=".json" style="display:none" />
+<input type="file" id="fileInput" accept=".json,application/json" hidden>
 
 <!-- NAV -->
 <nav class="nav">
-  <button class="nav-btn active" data-page="pageHoy" onclick="switchPage('pageHoy', this)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-    <span>Hoy</span>
-  </button>
-  <button class="nav-btn" data-page="pageSemana" onclick="switchPage('pageSemana', this)">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-    <span>Semana</span>
-  </button>
-  <button class="nav-btn" data-page="pageStats" onclick="switchPage('pageStats', this)">
-    <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
-    <span>Stats</span>
-  </button>
-  <button class="nav-btn" data-page="pageConfig" onclick="switchPage('pageConfig', this)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
-    <span>Config</span>
-  </button>
+  <div class="nav-inner">
+    <button class="nav-btn active" data-page="pageHoy" type="button">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <span>Hoy</span>
+    </button>
+    <button class="nav-btn" data-page="pageRepaso" type="button">
+      <svg viewBox="0 0 24 24"><rect x="3" y="5" width="14" height="16" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v14"/></svg>
+      <span>Repaso</span>
+    </button>
+    <button class="nav-btn" data-page="pageProgreso" type="button">
+      <svg viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      <span>Progreso</span>
+    </button>
+    <button class="nav-btn" data-page="pagePlan" type="button">
+      <svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
+      <span>Plan</span>
+    </button>
+    <button class="nav-btn" data-page="pageAjustes" type="button">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      <span>Ajustes</span>
+    </button>
+  </div>
 </nav>
 
-<script>
-// ========== DATA MODEL ==========
-const TOOLS = [
-  { id: 'italki', name: 'italki', icon: '🗣️', time: '30 min', core: true },
-  { id: 'talkpal', name: 'TalkPal', icon: '🤖', time: '15 min', core: true },
-  { id: 'anki', name: 'Anki', icon: '🧠', time: '5 min', core: true },
-  { id: 'podcast', name: 'Podcast', icon: '🎧', time: '15 min', core: true },
-  { id: 'elsa', name: 'ELSA', icon: '🎙️', time: '10 min', core: false },
-  { id: 'drops', name: 'Drops', icon: '💧', time: '5 min', core: false },
-];
-
-const WEEKLY_PLAN = {
-  0: ['anki'], // Domingo
-  1: ['italki', 'anki'], // Lunes
-  2: ['elsa', 'talkpal', 'anki'], // Martes
-  3: ['podcast', 'anki', 'drops'], // Miércoles
-  4: ['italki', 'anki'], // Jueves
-  5: ['talkpal', 'elsa'], // Viernes
-  6: ['podcast'], // Sábado — inmersión libre
-};
-
-const DAY_NAMES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-const MONTH_NAMES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-
-// ========== STORAGE ==========
-function getKey(date) { return date.toISOString().slice(0, 10); }
-function today() { return new Date(); }
-function todayKey() { return getKey(today()); }
-
-function getData() {
-  try { return JSON.parse(localStorage.getItem('en_tracker') || '{}'); } catch { return {}; }
-}
-function saveData(data) { localStorage.setItem('en_tracker', JSON.stringify(data)); }
-
-function getDayData(dateKey) {
-  const data = getData();
-  return data[dateKey] || { tools: [] };
-}
-function setDayData(dateKey, dayData) {
-  const data = getData();
-  data[dateKey] = dayData;
-  saveData(data);
-}
-
-// ========== SYNC ==========
-function getSyncUrl() { return localStorage.getItem('en_sync_url') || ''; }
-function setSyncUrl(url) { localStorage.setItem('en_sync_url', url); }
-
-async function syncToSheet(dateKey, toolsDone) {
-  const url = getSyncUrl();
-  if (!url) return;
-  try {
-    await fetch(url, {
-      method: 'POST', mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: dateKey, tools: toolsDone, timestamp: new Date().toISOString() })
-    });
-  } catch(e) { console.warn('Sync failed:', e); }
-}
-
-// ========== NAV ==========
-function switchPage(pageId, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(pageId).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (pageId === 'pageSemana') renderWeek();
-  if (pageId === 'pageStats') renderStats();
-}
-
-// ========== TOAST ==========
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-// ========== MODALS ==========
-function showResetModal() { document.getElementById('resetModal').classList.add('show'); }
-function showSyncModal() {
-  document.getElementById('syncUrl').value = getSyncUrl();
-  document.getElementById('syncModal').classList.add('show');
-}
-function hideModal(id) { document.getElementById(id).classList.remove('show'); }
-
-function resetAll() {
-  localStorage.removeItem('en_tracker');
-  hideModal('resetModal');
-  toast('Datos eliminados');
-  renderAll();
-}
-
-function saveSyncUrl() {
-  const url = document.getElementById('syncUrl').value.trim();
-  setSyncUrl(url);
-  hideModal('syncModal');
-  toast(url ? 'Sync configurado ✓' : 'Sync desactivado');
-}
-
-// ========== EXPORT / IMPORT ==========
-function exportData() {
-  const data = getData();
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `en_tracker_${todayKey()}.json`;
-  a.click(); URL.revokeObjectURL(url);
-  toast('Datos exportados ✓');
-}
-
-function importData() { document.getElementById('fileInput').click(); }
-document.getElementById('fileInput')?.addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    try {
-      const imported = JSON.parse(ev.target.result);
-      const current = getData();
-      const merged = { ...current, ...imported };
-      saveData(merged);
-      toast('Datos importados ✓');
-      renderAll();
-    } catch { toast('Error: archivo no válido'); }
-  };
-  reader.readAsText(file);
-  this.value = '';
-});
-
-// ========== RENDER: HOY ==========
-function renderToday() {
-  const key = todayKey();
-  const dayData = getDayData(key);
-  const grid = document.getElementById('toolsGrid');
-  grid.innerHTML = '';
-
-  TOOLS.forEach(tool => {
-    const done = dayData.tools.includes(tool.id);
-    const btn = document.createElement('button');
-    btn.className = `tool-btn${done ? ' done' : ''}`;
-    btn.innerHTML = `
-      <span class="tool-icon">${tool.icon}</span>
-      <span class="tool-name">${tool.name}</span>
-      <span class="tool-time">${tool.time}</span>
-      ${done ? '<div class="tool-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>' : ''}
-    `;
-    btn.onclick = () => toggleTool(tool.id);
-    grid.appendChild(btn);
-  });
-
-  // Today plan
-  const dow = today().getDay();
-  const planned = WEEKLY_PLAN[dow] || [];
-  const planDiv = document.getElementById('todayPlan');
-  if (planned.length === 0) {
-    planDiv.innerHTML = '<p style="font-size:13px;color:var(--text-3);">Día libre — inmersión pasiva</p>';
-    return;
-  }
-  planDiv.innerHTML = planned.map(tid => {
-    const tool = TOOLS.find(t => t.id === tid);
-    const done = dayData.tools.includes(tid);
-    const status = done ? 'done' : 'pending';
-    const label = done ? '✓' : 'Pendiente';
-    return `<div class="plan-row">
-      <div class="plan-dot ${status}"></div>
-      <div class="plan-tool">${tool.icon} ${tool.name}</div>
-      <div class="plan-time">${tool.time}</div>
-      <div class="plan-status ${status}">${label}</div>
-    </div>`;
-  }).join('');
-
-  // Header date
-  const d = today();
-  document.getElementById('headerDate').textContent =
-    `${DAY_NAMES[d.getDay()]} ${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
-}
-
-function toggleTool(toolId) {
-  const key = todayKey();
-  const dayData = getDayData(key);
-  const idx = dayData.tools.indexOf(toolId);
-  if (idx >= 0) {
-    dayData.tools.splice(idx, 1);
-  } else {
-    dayData.tools.push(toolId);
-  }
-  setDayData(key, dayData);
-  syncToSheet(key, dayData.tools);
-  renderToday();
-  renderStreaks();
-}
-
-// ========== RENDER: STREAKS ==========
-function renderStreaks() {
-  const data = getData();
-  let current = 0, best = 0, totalSessions = 0;
-  const d = new Date(); d.setHours(0,0,0,0);
-
-  // Count streak
-  let streak = 0;
-  for (let i = 0; i < 365; i++) {
-    const k = getKey(d);
-    const dd = data[k];
-    if (dd && dd.tools && dd.tools.length > 0) {
-      streak++;
-      d.setDate(d.getDate() - 1);
-    } else if (i === 0) {
-      d.setDate(d.getDate() - 1); // today might not have data yet
-    } else {
-      break;
-    }
-  }
-  current = streak;
-
-  // Count best streak + total
-  const allKeys = Object.keys(data).sort();
-  let tempStreak = 0;
-  allKeys.forEach(k => {
-    const dd = data[k];
-    if (dd && dd.tools && dd.tools.length > 0) {
-      tempStreak++;
-      totalSessions += dd.tools.length;
-      if (tempStreak > best) best = tempStreak;
-    } else {
-      tempStreak = 0;
-    }
-  });
-  if (current > best) best = current;
-
-  document.getElementById('streakCurrent').textContent = current;
-  document.getElementById('streakBest').textContent = best;
-  document.getElementById('totalSessions').textContent = totalSessions;
-}
-
-// ========== RENDER: WEEK ==========
-let selectedWeekDay = null;
-
-function renderWeek() {
-  const data = getData();
-  const grid = document.getElementById('weekGrid');
-  grid.innerHTML = '';
-  const now = today();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Monday
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    const key = getKey(d);
-    const dd = data[key];
-    const isToday = key === todayKey();
-    const hasData = dd && dd.tools && dd.tools.length > 0;
-
-    const col = document.createElement('div');
-    col.className = `week-day${isToday ? ' today' : ''}${hasData ? ' has-data' : ''}`;
-    col.innerHTML = `
-      <div class="week-day-name">${DAY_NAMES[(i + 1) % 7]}</div>
-      <div class="week-day-num">${d.getDate()}</div>
-      <div class="week-day-dots">
-        ${hasData ? dd.tools.map(() => '<div class="week-day-dot"></div>').join('') : ''}
-      </div>
-    `;
-    col.onclick = () => showDayDetail(d, key);
-    grid.appendChild(col);
-  }
-}
-
-function showDayDetail(date, key) {
-  const data = getData();
-  const dd = data[key] || { tools: [] };
-  const dow = date.getDay();
-  const planned = WEEKLY_PLAN[dow] || [];
-  const detail = document.getElementById('dayDetail');
-
-  const toolsDone = dd.tools || [];
-  const allTools = [...new Set([...planned, ...toolsDone])];
-
-  if (allTools.length === 0) {
-    detail.innerHTML = '<p style="font-size:13px;color:var(--text-3);">Día libre</p>';
-    return;
-  }
-
-  detail.innerHTML = `
-    <div style="font-size:12px;color:var(--text-3);margin-bottom:10px;font-weight:600;">
-      ${DAY_NAMES[dow]} ${date.getDate()} ${MONTH_NAMES[date.getMonth()]}
-    </div>
-    ${allTools.map(tid => {
-      const tool = TOOLS.find(t => t.id === tid);
-      if (!tool) return '';
-      const wasPlanned = planned.includes(tid);
-      const wasDone = toolsDone.includes(tid);
-      let status, label;
-      if (wasDone) { status = 'done'; label = '✓'; }
-      else if (wasPlanned) { status = 'missed'; label = 'No hecho'; }
-      else { status = 'done'; label = 'Extra'; }
-      return `<div class="plan-row">
-        <div class="plan-dot ${status}"></div>
-        <div class="plan-tool">${tool.icon} ${tool.name}</div>
-        <div class="plan-time">${tool.time}</div>
-        <div class="plan-status ${status}">${label}</div>
-      </div>`;
-    }).join('')}
-  `;
-}
-
-// ========== RENDER: STATS ==========
-function renderStats() {
-  const data = getData();
-  const now = today();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay() + 1);
-
-  let planned = 0, done = 0;
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    const key = getKey(d);
-    if (d > now) continue;
-    const dow = d.getDay();
-    const p = WEEKLY_PLAN[dow] || [];
-    planned += p.length;
-    const dd = data[key];
-    if (dd && dd.tools) {
-      done += p.filter(t => dd.tools.includes(t)).length;
-    }
-  }
-
-  const pct = planned > 0 ? Math.round((done / planned) * 100) : 0;
-  document.getElementById('adherencePct').textContent = pct + '%';
-  const circumference = 2 * Math.PI * 60;
-  const offset = circumference - (pct / 100) * circumference;
-  document.getElementById('ringFg').style.strokeDashoffset = offset;
-
-  // Tool totals
-  let totals = { italki: 0, talkpal: 0, anki: 0, podcast: 0 };
-  Object.values(data).forEach(dd => {
-    if (dd && dd.tools) {
-      dd.tools.forEach(t => { if (totals[t] !== undefined) totals[t]++; });
-    }
-  });
-  document.getElementById('statItalki').textContent = totals.italki;
-  document.getElementById('statTalkpal').textContent = totals.talkpal;
-  document.getElementById('statAnki').textContent = totals.anki;
-  document.getElementById('statPodcast').textContent = totals.podcast;
-
-  // Heatmap
-  const heatmap = document.getElementById('heatmap');
-  heatmap.innerHTML = '';
-  for (let i = 59; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    const key = getKey(d);
-    const dd = data[key];
-    const count = dd && dd.tools ? dd.tools.length : 0;
-    const level = count === 0 ? '' : count <= 1 ? 'l1' : count <= 2 ? 'l2' : count <= 3 ? 'l3' : 'l4';
-    const cell = document.createElement('div');
-    cell.className = `heat-cell ${level}`;
-    cell.title = `${key}: ${count} sesiones`;
-    heatmap.appendChild(cell);
-  }
-}
-
-// ========== INIT ==========
-function renderAll() {
-  renderToday();
-  renderStreaks();
-}
-renderAll();
-</script>
+<script src="content.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
