@@ -1,5 +1,5 @@
 // =====================================================================
-// CONTENIDO DE APRENDIZAJE — EN Tracker (camino al C1)
+// TARJETAS DE REPASO — EN C1 (el curso está en course.js)
 // ---------------------------------------------------------------------
 // Para añadir tarjetas: copia una línea del mismo tipo y cambia el id
 // (debe ser único). *palabra* se muestra en negrita.
@@ -15,7 +15,8 @@ const CATEGORIES = [
   { id: 'link', name: 'Linkers & tone',    icon: '🪢' },
   { id: 'gram', name: 'Gramática C1',      icon: '🏗️' },
   { id: 'work', name: 'Work English',      icon: '💼' },
-  { id: 'mine', name: 'Mis frases',        icon: '📝' },
+  { id: 'vocab', name: 'Vocabulario curso', icon: '📚' },
+  { id: 'mine', name: 'Mis frases y fallos', icon: '📝' },
 ];
 
 const Q = {
@@ -246,63 +247,7 @@ const DECK = [
   { id: 'wk25', cat: 'work', front: '(Email) A gentle reminder.', back: '*Just a quick reminder about…* / *I\'m just checking in on…*' },
 ];
 
-// ---------- RETOS DIARIOS ----------
-const SPEAKING_TOPICS = [
-  'Describe your job to someone who knows nothing about your industry.',
-  'Tell the story of your best day at work.',
-  'Explain a problem you solved recently and how you solved it.',
-  'Describe your hometown and how it has changed over the years.',
-  'Talk about a book, series or film that changed the way you think.',
-  'Explain your daily routine and one thing you would like to change.',
-  'Describe a person who has influenced your career.',
-  'Argue for or against working from home.',
-  'Talk about a mistake you made and what you learned from it.',
-  'Explain how to cook your favourite dish.',
-  'Describe your ideal job in five years\' time.',
-  'Talk about your training routine and why you do it.',
-  'Explain something you know well as if you were teaching a beginner.',
-  'Describe a trip you would love to take and why.',
-  'Should companies pay more to employees who speak several languages?',
-  'How is AI changing your job or your industry?',
-  'Describe a difficult conversation you had and how you handled it.',
-  'What are the pros and cons of living in your city?',
-  'Talk about a goal you achieved and the steps you took.',
-  'Tell the story of a funny misunderstanding.',
-  'Describe your perfect weekend.',
-  'Explain a decision you are currently thinking about.',
-  'Talk about how you manage your money and your long-term plans.',
-  'Is social media good or bad for society?',
-  'Describe the best boss or teacher you have ever had.',
-  'Why are you learning English and what will change when you reach C1?',
-  'Explain Catalan and Spanish culture to a foreigner who is moving here.',
-  'Describe a project you are proud of.',
-  'What would you change in your company if you were the CEO?',
-  'Talk about a habit you want to build and how you will do it.',
-];
-
-// level: fase mínima en la que aparece (1, 2 o 3)
-const WRITING_TASKS = [
-  { level: 1, text: 'Journal: what went well today, what didn\'t, and what you\'ll do tomorrow.', words: 100 },
-  { level: 1, text: 'Email to a colleague asking to reschedule a meeting and proposing two alternative times.', words: 120 },
-  { level: 1, text: 'Summarise a podcast episode or video you watched this week.', words: 120 },
-  { level: 1, text: 'Explain a news story you read today in your own words.', words: 150 },
-  { level: 1, text: 'Describe a process at your job step by step (first, then, once, finally…).', words: 150 },
-  { level: 1, text: 'A letter to your future self on the day you pass your C1 exam.', words: 150 },
-  { level: 2, text: 'Write the "About" section of your LinkedIn profile.', words: 150 },
-  { level: 2, text: 'Polite email complaining about a service and asking for a solution.', words: 150 },
-  { level: 2, text: 'Cover letter paragraph: why you are a great fit for a job you would like.', words: 150 },
-  { level: 2, text: 'Opinion: remote work vs the office. Use however, moreover and consequently.', words: 150 },
-  { level: 2, text: 'Describe a chart or some figures from your work (rose sharply, fell slightly…).', words: 150 },
-  { level: 2, text: 'Follow-up email to a recruiter after a job interview.', words: 120 },
-  { level: 2, text: 'A mistake and what you learned — use at least two mixed conditionals.', words: 120 },
-  { level: 2, text: 'Rewrite a text you wrote last week to make it more formal and precise.', words: 150 },
-  { level: 3, text: 'C1 Essay: "Should learning a foreign language be compulsory until 18?" Discuss two points and give your opinion.', words: 240 },
-  { level: 3, text: 'C1 Report: summarise the results of a project and make recommendations.', words: 240 },
-  { level: 3, text: 'C1 Proposal: suggest an improvement for your workplace and justify it.', words: 240 },
-  { level: 3, text: 'C1 Review: review a series, book or restaurant for an international website.', words: 240 },
-  { level: 3, text: 'C1 Formal letter: apply for a volunteer role at an international event.', words: 240 },
-];
-
+// ---------- MISIONES PARA PENSAR EN INGLÉS (fuera de la app) ----------
 const SELFTALK_MISSIONS = [
   'While making breakfast, narrate every step out loud.',
   'On your way to work, describe what you see: people, buildings, the weather.',
@@ -320,25 +265,8 @@ const SELFTALK_MISSIONS = [
   'Before sleeping, review your day in your head — only in English.',
   'Argue both sides of a decision you need to make.',
   'While shopping, narrate what you need, compare prices and explain your choices.',
-  'Prepare out loud what you want to say in your next italki class.',
+  'Prepare out loud what you want to say in your next speaking session.',
   'During a 10-minute walk, only English is allowed in your head.',
   'Explain your job to a 10-year-old.',
   'Describe a photo on your phone as if the listener couldn\'t see it.',
 ];
-
-// Cómo hacer cada actividad (se muestra al registrarla)
-const TOOL_GUIDES = {
-  italki: 'Tutor profesional mejor que "community tutor". Pide que te corrija y te mande las correcciones por escrito → guárdalas en "Mis frases". Temas de trabajo y entrevistas. En fase 3, simula el Speaking del examen.',
-  talkpal: 'Role-plays: entrevista, reunión, negociación. Al final pide: "List my mistakes and give me more natural alternatives." Guarda 2–3 en "Mis frases".',
-  anki: 'Solo tarjetas inglés–inglés: frase de contexto + definición o imagen, nunca "palabra = traducción". 5–10 min, sin saltarte días.',
-  repaso: 'Tarjetas de esta app. Di la respuesta EN VOZ ALTA antes de girarla y usa 🔊 para imitar la pronunciación. Se registra sola al repasar.',
-  shadowing: 'Audio de 1–2 min con transcripción (6 Minute English, TED, YouTube). 1) Escucha leyendo. 2) Repite a la vez imitando ritmo y entonación. 3) Grábate y compara. 3–5 repeticiones.',
-  selftalk: 'Habla contigo en voz alta (o en tu cabeza) narrando lo que haces. Si te falta una palabra, descríbela en inglés. Mira la misión en "Reto del día".',
-  escritura: 'Escribe el reto del día sin traductor. Luego pide: "Correct my text, explain each mistake briefly and rewrite it at C1 level." Guarda los errores repetidos en "Mis frases".',
-  elsa: 'Céntrate en lo que más nos cuesta: vocales largas/cortas (ship/sheep), la schwa /ə/, las -ed y -s finales y el acento de palabra.',
-  examen: 'Modelos oficiales de Cambridge C1 Advanced o de la EOI. Alterna Reading & Use of English, Writing, Listening y Speaking. Siempre cronometrado.',
-  podcast: 'Input a tu nivel: debes entender el 80–90 %. Si entiendes menos del 70 %, baja de nivel. Nada de subtítulos en español.',
-  lectura: 'Artículos o libros de tu campo o de lo que te guste. No busques cada palabra: solo las que se repiten. Diccionario inglés–inglés.',
-  series: 'Subtítulos en inglés, nunca en español. Cuando lo entiendas bien, quítalos. Repite en voz alta frases cortas que te gusten.',
-  drops: 'Vocabulario básico en formato juego.',
-};

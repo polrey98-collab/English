@@ -1,36 +1,44 @@
-# EN Tracker: camino al C1 🇬🇧
+# EN C1: curso de inglés B2 → C1 🇬🇧
 
-App personal para pasar de **B2 a C1** en inglés y aprender a **pensar en inglés sin traducir**.
-Funciona en el móvil y en el PC, se instala como una app y funciona sin conexión.
+Curso propio y completo dentro de la web: **no depende de apps externas**. Funciona en el móvil y en el PC, se instala como una app y funciona sin conexión.
 
-## Qué hace
+## Cómo está organizado
 
-| Pestaña | Para qué sirve |
-|---|---|
-| **Hoy** | Plan del día según tu fase, reto diario (Speaking 4/3/2, Self-talk o Writing), frase del día y registro de actividades con minutos o temporizador (te avisa a los 30 min). |
-| **Repaso** | ~170 tarjetas con repetición espaciada: falsos amigos, errores típicos de hispanohablantes y catalanohablantes, collocations, phrasal verbs, linkers, gramática C1 e inglés de trabajo. Tienen audio 🔊 y puedes añadir **tus propias frases** (las correcciones de italki o de la IA). |
-| **Progreso** | Horas de práctica e input frente al objetivo, fecha estimada para llegar, semana (editable), tests EF SET con su nivel MCER, tarjetas dominadas y mapa de actividad. |
-| **Plan** | Las 3 fases, tu semana tipo, cómo pensar en inglés, cómo hacer cada actividad, recursos y certificados. |
-| **Ajustes** | Fecha de inicio, fase, objetivos, tarjetas nuevas al día, acento, exportar/importar, Google Sheets e instalación. |
+- **Test de nivel** (24 preguntas, 10 min): te dice desde dónde partes y qué unidades te convienen.
+- **8 unidades** (bloque 1, de B2 a las puertas del C1), cada una con un tema y un punto de gramática:
 
-## Cómo usarla desde el móvil y el PC
+| # | Tema | Gramática | Nivel |
+|---|---|---|---|
+| 1 | Work & Careers | Present perfect vs past simple | B2 |
+| 2 | Technology & AI | Formas de futuro | B2 |
+| 3 | Money & Economy | Condicionales (incluidos los mixtos) | B2 |
+| 4 | Health & Fitness | Modales de deducción | B2+ |
+| 5 | Travel & Culture | Oraciones de relativo | B2+ |
+| 6 | Communication & Media | Estilo indirecto y verbos de reporte | B2+ |
+| 7 | Environment & Cities | Pasiva y pasiva de reporte | C1 |
+| 8 | Leadership & Negotiation | Inversión y cleft sentences | C1 |
 
-1. Publica el repo con **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / root*.
-2. Abre `https://polrey98-collab.github.io/English/` (o la URL que te indique GitHub).
-3. Instálala:
+- **5 sesiones guiadas por unidad** (20–30 min cada una). Todas empiezan con un calentamiento de repaso:
+  1. 📖 Vocabulario (10 palabras con audio) + quiz + lectura con preguntas
+  2. 🏗️ Explicación de gramática + la trampa típica del hispanohablante + ejercicios corregidos al momento
+  3. 🎧 Listening (diálogo con voces) + shadowing (grábate y compara; comprobación automática en Chrome)
+  4. 🗣️ Vocabulario en contexto + speaking con la técnica 4/3/2 y grabación
+  5. ✍️ Writing con checklist y texto modelo + test de unidad
+- **Repaso con repetición espaciada**: ~200 tarjetas (falsos amigos, errores típicos, collocations, phrasal verbs, linkers, gramática C1, inglés de trabajo) más el vocabulario de cada unidad. **Los ejercicios que falles se añaden solos** y vuelven hasta que los domines.
+- **Progreso**: racha, sesiones, horas, acierto por unidad, evolución del test de nivel, fecha estimada para terminar y mapa de actividad.
+
+## Usarla desde el móvil y el PC
+
+1. Fusiona la rama en `main`.
+2. Activa **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / (root)*.
+3. Abre `https://polrey98-collab.github.io/English/` e instálala:
    - **iPhone:** Safari → Compartir → *Añadir a pantalla de inicio*.
    - **Android:** Chrome → ⋮ → *Instalar aplicación*.
-   - **PC:** icono de instalar en la barra de direcciones de Chrome o Edge.
+   - **PC:** icono de instalar en la barra de direcciones.
 
-### Datos y sincronización
-Los datos se guardan **en cada dispositivo** (localStorage). Para pasarlos de uno a otro, usa **Ajustes → Exportar** en uno e **Importar** en el otro. Los datos se fusionan y no se pierde nada. También acepta el JSON del tracker antiguo.
+El progreso se guarda en cada dispositivo. Para pasarlo de uno a otro, usa **Ajustes → Exportar / Importar**; los datos se fusionan.
 
 ## Añadir contenido
-Todo el contenido está en [`content.js`](content.js): tarjetas (`DECK`), temas de speaking, tareas de writing, misiones de self-talk y guías de cada actividad. Copia una línea, cámbiale el `id` y listo.
 
-## Archivos
-- `index.html`: estructura
-- `styles.css`: estilos (modo claro y oscuro)
-- `app.js`: lógica (tracker, repetición espaciada, progreso)
-- `content.js`: contenido de aprendizaje
-- `sw.js` y `manifest.webmanifest`: app instalable y funcionamiento sin conexión
+- [`course.js`](course.js): unidades, sesiones y test de nivel. Copia una unidad, cambia el `id` y el contenido.
+- [`content.js`](content.js): tarjetas del repaso y misiones para pensar en inglés.
