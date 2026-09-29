@@ -16,7 +16,7 @@ Funciona en el móvil y en el PC, se instala como una app y funciona sin conexi�
 ## Cómo usarla desde el móvil y el PC
 
 1. Publica el repo con **GitHub Pages**: *Settings → Pages → Deploy from a branch → `main` / root*.
-2. Abre `https://polrey98-collab.github.io/english/` (o la URL que te indique GitHub).
+2. Abre `https://polrey98-collab.github.io/English/` (o la URL que te indique GitHub).
 3. Instálala:
    - **iPhone:** Safari → Compartir → *Añadir a pantalla de inicio*.
    - **Android:** Chrome → ⋮ → *Instalar aplicación*.
