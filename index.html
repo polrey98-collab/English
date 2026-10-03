@@ -24,6 +24,7 @@
 <header class="header">
   <div class="wrap">
     <div class="header-date" id="headerDate"></div>
+    <button type="button" class="sync-dot" id="syncDot" hidden aria-label="Estado de la sincronización"></button>
     <div class="header-title">EN C1</div>
     <div class="header-sub" id="headerSub">Tu curso de inglés · B2 → C1</div>
   </div>
@@ -82,8 +83,8 @@
 
     <div class="card backup" id="backupTip" hidden>
       <div class="card-title">💾 Haz una copia de tu progreso</div>
-      <p class="small">Tu progreso solo está guardado en este móvil. Si borras los datos del navegador o cambias de móvil, lo perderías. Exporta una copia cada par de semanas y guárdala en Drive o en Archivos.</p>
-      <button type="button" class="btn primary" onclick="document.getElementById('exportBtn').click()">Exportar copia</button>
+      <p class="small">Tu progreso solo está guardado en este dispositivo. Activa la <strong>sincronización con GitHub</strong> (Ajustes) para no perderlo y seguir desde el PC o el móvil.</p>
+      <button type="button" class="btn primary" onclick="document.querySelector('.nav-btn[data-page=pageAjustes]').click()">Activar sincronización</button>
     </div>
 
     <div class="card tip">
@@ -161,6 +162,31 @@
 
   <!-- ===================== AJUSTES ===================== -->
   <section class="page" id="pageAjustes">
+    <div class="card" id="syncCard">
+      <div class="card-title">☁️ Sincronizar móvil y PC (GitHub)</div>
+      <div id="syncState" class="sync-state"></div>
+
+      <div id="syncSetup">
+        <p class="small">Guarda tu progreso en un <strong>Gist secreto</strong> de tu cuenta de GitHub para continuar en cualquier dispositivo. Se hace <strong>una vez en cada dispositivo</strong>:</p>
+        <ol class="rules small">
+          <li>Abre <a href="https://github.com/settings/tokens/new?scopes=gist&amp;description=EN%20C1%20sync" target="_blank" rel="noopener"><strong>este enlace</strong></a> (ya viene marcado solo el permiso <em>gist</em>).</li>
+          <li>En <em>Expiration</em> elige <strong>No expiration</strong> (o 1 año) y pulsa <strong>Generate token</strong>.</li>
+          <li>Copia el código (empieza por <code>ghp_</code>) y pégalo aquí. Usa el mismo código en el móvil y en el PC.</li>
+        </ol>
+        <input type="password" id="syncToken" class="inp wide" placeholder="ghp_…" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button type="button" class="btn primary block" id="syncConnect">Conectar</button>
+        <p class="muted small" style="margin-top:8px">El código solo da acceso a tus Gists (no a tus repositorios) y se guarda únicamente en este dispositivo.</p>
+      </div>
+
+      <div id="syncOn" hidden>
+        <p class="muted small">Se sincroniza sola al abrir la app, al volver a ella y al terminar cada actividad. Los datos de los dos dispositivos se fusionan: no se pierde nada.</p>
+        <div class="sync-actions">
+          <button type="button" class="btn primary" id="syncNowBtn">Sincronizar ahora</button>
+          <button type="button" class="btn" id="syncOff">Desconectar</button>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">Estudio</div>
       <div class="config-row">
@@ -192,7 +218,7 @@
 
     <div class="card">
       <div class="card-title">Datos</div>
-      <p class="muted small">Tu progreso se guarda en este dispositivo. Para pasarlo del móvil al PC (o al revés): <strong>Exportar</strong> en uno e <strong>Importar</strong> en el otro. Se fusiona, no se pierde nada.</p>
+      <p class="muted small">Copia manual en un archivo (útil como respaldo extra). Importar fusiona los datos, no borra nada.</p>
       <div class="config-row">
         <div><div class="config-label">Exportar</div><div class="config-sub">Descarga un JSON con todo</div></div>
         <button class="config-btn green" id="exportBtn" type="button">Exportar</button>
@@ -248,7 +274,7 @@
   <div class="modal" role="dialog" aria-modal="true">
     <div class="modal-handle"></div>
     <h3>¿Borrar todo?</h3>
-    <p>Se eliminarán el progreso del curso, las tarjetas, los tests y los ajustes. Exporta antes si quieres una copia.</p>
+    <p>Se eliminarán de este dispositivo el progreso, las tarjetas, los tests y los ajustes, y se desconectará la sincronización. La copia en GitHub no se borra.</p>
     <div class="modal-actions">
       <button class="btn-cancel" type="button" data-close="resetModal">Cancelar</button>
       <button class="btn-confirm" id="resetConfirm" type="button">Borrar todo</button>

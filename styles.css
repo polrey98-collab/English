@@ -521,3 +521,15 @@ h3.sub-h { margin-top: 18px; }
 .step-chip.done { background: var(--green-light); border-color: var(--green); color: var(--green); }
 .card.backup { border: 1.5px solid var(--amber); background: var(--amber-light); }
 .card.backup p { color: var(--text-2); margin-bottom: 10px; }
+
+/* ========== SINCRONIZACIÓN ========== */
+.header .wrap { position: relative; }
+.sync-dot {
+  position: absolute; top: -4px; right: 0; border: none; cursor: pointer; font: inherit;
+  background: rgba(255,255,255,.14); color: #fff; font-size: 13px; font-weight: 700;
+  padding: 6px 10px; border-radius: 999px; min-height: 32px;
+}
+.sync-state { background: var(--bg-card-alt); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; }
+.sync-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.sync-actions .btn { flex: 1; min-width: 140px; }
+#syncCard code { font-size: 12px; background: var(--bg-card-alt); padding: 1px 5px; border-radius: 4px; }

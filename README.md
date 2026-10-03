@@ -37,7 +37,17 @@ Curso propio y completo dentro de la web: **no depende de apps externas**. Funci
    - **Android:** Chrome → ⋮ → *Instalar aplicación*.
    - **PC:** icono de instalar en la barra de direcciones.
 
-El progreso se guarda en cada dispositivo. Para pasarlo de uno a otro, usa **Ajustes → Exportar / Importar**; los datos se fusionan.
+### Sincronizar móvil y PC
+
+El progreso se guarda en un **Gist secreto** de tu cuenta de GitHub (no en este repositorio, que es público). Se configura una vez en cada dispositivo:
+
+1. Crea un token con **solo el permiso `gist`**: [github.com/settings/tokens/new?scopes=gist](https://github.com/settings/tokens/new?scopes=gist&description=EN%20C1%20sync). En *Expiration* elige *No expiration* (o 1 año).
+2. En la app: **Ajustes → Sincronizar móvil y PC** → pega el token → **Conectar**.
+3. Repite en el otro dispositivo con el mismo token.
+
+A partir de ahí se sincroniza sola (al abrir la app, al volver a ella y al terminar cada actividad). Los datos se **fusionan**, así que nunca se pierde nada: los minutos de cada dispositivo se suman, una sesión a medias en el móvil se puede continuar en el PC y lo que borres no reaparece. Sin conexión funciona igual y se sincroniza al volver la red.
+
+Como respaldo extra, también puedes usar **Ajustes → Exportar / Importar** con un archivo.
 
 ## Añadir contenido
 

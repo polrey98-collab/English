@@ -28,8 +28,10 @@ const STEP_INFO = {
 
 const K = {
   days: 'en_days', legacy: 'en_tracker', progress: 'en_progress', srs: 'en_srs', custom: 'en_custom',
-  tests: 'en_level_tests', settings: 'en_settings', resume: 'en_resume',
+  tests: 'en_level_tests', settings: 'en_settings', resume: 'en_resume', deleted: 'en_deleted',
 };
+// Claves que se sincronizan con GitHub (los ajustes y el token se quedan en cada dispositivo)
+const SYNCED_KEYS = new Set([K.days, K.legacy, K.progress, K.srs, K.custom, K.tests, K.resume, K.deleted]);
 const DEFAULT_SETTINGS = { weekly: 5, newPerDay: 5, voice: 'en-GB', rate: 0.95 };
 
 // =====================================================================
@@ -44,8 +46,17 @@ const paras = t => t.split(/\n\s*\n/).map(p => `<p>${fmt(p).replace(/\n/g, '<br>
 
 const store = {
   get(k, fb) { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch { return fb; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast('⚠️ No se pudo guardar'); } },
+  set(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast('⚠️ No se pudo guardar'); return; }
+    if (SYNCED_KEYS.has(k)) markDirty();
+  },
 };
+// Identificador de este dispositivo (para sumar los minutos de móvil y PC sin duplicarlos)
+const DEVICE = (() => {
+  let d = localStorage.getItem('en_device');
+  if (!d) { d = 'd' + Math.random().toString(36).slice(2, 10); localStorage.setItem('en_device', d); }
+  return d;
+})();
 
 function keyOf(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 function parseKey(k) { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); }
@@ -82,13 +93,31 @@ const isCorrect = (input, answers) => answers.some(a => canon(a) === canon(input
 function getSettings() { return { ...DEFAULT_SETTINGS, ...store.get(K.settings, {}) }; }
 function saveSettings(patch) { store.set(K.settings, { ...getSettings(), ...patch }); }
 
-function normDay(d) {
-  d = d || {};
-  return { study: d.study || 0, reviewSecs: d.reviewSecs || 0, reviews: d.reviews || 0, newCards: d.newCards || 0, sessions: Array.isArray(d.sessions) ? d.sessions.slice() : [] };
+// Cada día guarda la aportación de cada dispositivo por separado (byDev) y se muestra la suma
+const DAY_NUM = ['study', 'reviewSecs', 'reviews', 'newCards'];
+function dayParts(raw) {
+  raw = raw || {};
+  if (raw.byDev) return raw.byDev;
+  const base = {}; DAY_NUM.forEach(f => { base[f] = raw[f] || 0; }); // formato anterior
+  return DAY_NUM.some(f => base[f]) ? { base } : {};
+}
+function normDay(raw) {
+  raw = raw || {};
+  const parts = Object.values(dayParts(raw));
+  const d = { sessions: Array.isArray(raw.sessions) ? raw.sessions.slice() : [] };
+  DAY_NUM.forEach(f => { d[f] = parts.reduce((sum, p) => sum + (p[f] || 0), 0); });
+  return d;
 }
 function getDays() { return store.get(K.days, {}); }
 function getDay(k) { return normDay(getDays()[k]); }
-function saveDay(k, day) { const all = getDays(); all[k] = day; store.set(K.days, all); }
+function saveDay(k, day) {
+  const all = getDays(), raw = all[k] || {}, cur = normDay(raw), parts = { ...dayParts(raw) };
+  const mine = { ...(parts[DEVICE] || {}) };
+  DAY_NUM.forEach(f => { mine[f] = Math.max(0, (mine[f] || 0) + (day[f] - cur[f])); });
+  parts[DEVICE] = mine;
+  all[k] = { byDev: parts, sessions: [...new Set(day.sessions)] };
+  store.set(K.days, all);
+}
 function legacyMins(k) {
   const d = store.get(K.legacy, {})[k];
   if (!d || !Array.isArray(d.tools) || !d.tools.length) return 0;
@@ -101,7 +130,8 @@ function getProgress() { const p = store.get(K.progress, {}); return { sessions:
 function saveProgress(p) { store.set(K.progress, p); }
 
 function getSrs() { return store.get(K.srs, {}); }
-function getCustom() { return store.get(K.custom, []); }
+function getDeleted() { return store.get(K.deleted, []); }
+function getCustom() { const del = new Set(getDeleted()); return store.get(K.custom, []).filter(c => !del.has(c.id)); }
 function getTests() { return store.get(K.tests, []).slice().sort((a, b) => a.date.localeCompare(b.date)); }
 
 // Tarjetas: mazo general + vocabulario desbloqueado del curso + frases propias/fallos
@@ -308,8 +338,8 @@ function renderToday() {
 
   renderMission();
 
-  const last = s.lastExport;
-  $('backupTip').hidden = !(doneCount() >= 3 && (!last || diffDays(last, t) >= 14));
+
+  $('backupTip').hidden = !!ghToken() || doneCount() < 1;
 }
 
 let missionOffset = 0;
@@ -535,6 +565,7 @@ $('mineList').addEventListener('click', e => {
   const b = e.target.closest('[data-del]'); if (!b) return;
   if (!confirm('¿Borrar esta frase?')) return;
   store.set(K.custom, getCustom().filter(c => c.id !== b.dataset.del));
+  store.set(K.deleted, [...new Set([...getDeleted(), b.dataset.del])]); // para que no vuelva al sincronizar
   const srs = getSrs(); delete srs[b.dataset.del]; store.set(K.srs, srs);
   renderMine(); renderCatChips();
 });
@@ -627,7 +658,7 @@ function getResume() {
 function activeMs() { return P.elapsed + (P.activeSince ? Date.now() - P.activeSince : 0); }
 function saveResume() {
   if (!P || P.ended || P.sid === 'placement') return;
-  store.set(K.resume, { sid: P.sid, i: P.i, elapsed: activeMs(), graded: P.graded.map(g => ({ ok: g.ok, total: g.total })), fails: P.fails, saved: todayKey() });
+  store.set(K.resume, { sid: P.sid, i: P.i, elapsed: activeMs(), graded: P.graded.map(g => ({ ok: g.ok, total: g.total })), fails: P.fails, saved: todayKey(), ts: Date.now() });
 }
 let ignorePop = false;
 function closePlayer(fromBack) {
@@ -1050,6 +1081,7 @@ function renderAjustes() {
   $('setNewPerDay').value = s.newPerDay;
   $('setVoice').value = s.voice;
   $('setRate').value = String(s.rate);
+  setSyncStatus();
 }
 function bindSetting(id, key, parse) {
   $(id).addEventListener('change', e => {
@@ -1063,12 +1095,15 @@ bindSetting('setNewPerDay', 'newPerDay', v => { const n = parseInt(v, 10); retur
 bindSetting('setVoice', 'voice', v => v);
 bindSetting('setRate', 'rate', v => +v);
 
-function exportAll() {
-  return {
-    app: 'en-c1', version: 3, exported: new Date().toISOString(),
+function exportAll(stamp = true) {
+  const out = {
+    app: 'en-c1', version: 3,
     days: getDays(), legacy: store.get(K.legacy, {}), progress: getProgress(),
-    srs: getSrs(), custom: getCustom(), tests: store.get(K.tests, []), settings: store.get(K.settings, {}),
+    srs: getSrs(), custom: getCustom(), deleted: getDeleted(), resume: store.get(K.resume, null),
+    tests: store.get(K.tests, []), settings: store.get(K.settings, {}),
   };
+  if (stamp) out.exported = new Date().toISOString();
+  return out;
 }
 $('exportBtn').onclick = () => {
   const blob = new Blob([JSON.stringify(exportAll(), null, 2)], { type: 'application/json' });
@@ -1105,12 +1140,20 @@ function mergeImport(obj) {
   store.set(K.legacy, legacy);
 
   if (isV3) {
+    // Días: por dispositivo, se queda el valor más alto de cada uno (nunca se duplica ni se pierde)
     const days = getDays();
     Object.entries(obj.days || {}).forEach(([k, raw]) => {
-      const a = normDay(days[k]), b = normDay(raw);
-      days[k] = { study: Math.max(a.study, b.study), reviewSecs: Math.max(a.reviewSecs, b.reviewSecs), reviews: Math.max(a.reviews, b.reviews), newCards: Math.max(a.newCards, b.newCards), sessions: [...new Set([...a.sessions, ...b.sessions])] };
+      const pa = dayParts(days[k]), pb = dayParts(raw), parts = { ...pa };
+      Object.entries(pb).forEach(([dev, pt]) => {
+        const q = parts[dev] || {};
+        parts[dev] = Object.fromEntries(DAY_NUM.map(f => [f, Math.max(q[f] || 0, pt[f] || 0)]));
+      });
+      days[k] = { byDev: parts, sessions: [...new Set([...normDay(days[k]).sessions, ...normDay(raw).sessions])] };
     });
     store.set(K.days, days);
+    // Sesión a medias: gana la más reciente
+    const rIn = obj.resume, rCur = store.get(K.resume, null);
+    if (rIn && rIn.sid && (!rCur || (rIn.ts || 0) > (rCur.ts || 0))) store.set(K.resume, rIn);
     const p = getProgress(), ip = obj.progress || {};
     Object.entries(ip.sessions || {}).forEach(([sid, r]) => {
       const c = p.sessions[sid];
@@ -1127,17 +1170,24 @@ function mergeImport(obj) {
     Object.entries(obj.srs).forEach(([id, s]) => { if (!srs[id] || (s.reps || 0) > (srs[id].reps || 0)) srs[id] = s; });
     store.set(K.srs, srs);
   }
+  if (obj.deleted) store.set(K.deleted, [...new Set([...getDeleted(), ...obj.deleted])]);
   if (obj.custom) {
-    const custom = getCustom();
-    obj.custom.forEach(c => { if (c && c.id && !custom.some(x => x.id === c.id)) custom.push(c); });
+    const custom = getCustom(), del = new Set(getDeleted());
+    obj.custom.forEach(c => { if (c && c.id && !del.has(c.id) && !custom.some(x => x.id === c.id)) custom.push(c); });
     store.set(K.custom, custom);
   }
+  const del = getDeleted();
+  if (del.length) { const srs = getSrs(); let ch = false; del.forEach(id => { if (srs[id]) { delete srs[id]; ch = true; } }); if (ch) store.set(K.srs, srs); }
+  // Si la sesión a medias ya se terminó en otro dispositivo, se descarta
+  const r = store.get(K.resume, null);
+  if (r && getProgress().sessions[r.sid]) localStorage.removeItem(K.resume);
 }
 
 $('resetBtn').onclick = () => showModal('resetModal');
 $('resetConfirm').onclick = () => {
   Object.values(K).forEach(k => localStorage.removeItem(k));
   ['en_sync_url', 'en_timer', 'en_tests'].forEach(k => localStorage.removeItem(k));
+  Object.values(GH).forEach(k => localStorage.removeItem(k)); syncDirty = false; // la copia en GitHub no se borra
   hideModal('resetModal'); toast('Datos eliminados'); renderAll();
 };
 
@@ -1147,6 +1197,143 @@ $('installBtn').onclick = async () => { if (!installEvt) return; installEvt.prom
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
+
+// =====================================================================
+// SINCRONIZACIÓN CON GITHUB (Gist secreto)
+// ---------------------------------------------------------------------
+// Los datos se guardan en un Gist secreto de tu cuenta. Cada dispositivo
+// descarga la copia, la fusiona con lo suyo (nunca se pisa nada) y sube
+// el resultado. El token solo necesita el permiso "gist".
+// =====================================================================
+var GH = { token: 'en_gh_token', gist: 'en_gh_gist', last: 'en_gh_last', user: 'en_gh_user', url: 'en_gh_url' };
+var GIST_FILE = 'en-c1-progress.json';
+var GIST_DESC = 'EN C1 — progreso del curso (sincronización, no borrar)';
+var syncDirty = false, syncBusy = false, syncAgain = false, syncTimer = null, syncMuted = false, syncError = '';
+
+function ghToken() { return localStorage.getItem(GH.token) || ''; }
+function markDirty() {
+  if (syncMuted || !ghToken()) return;
+  syncDirty = true;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncNow(), 4000);
+  setSyncStatus();
+}
+async function gh(path, opts = {}) {
+  const r = await fetch('https://api.github.com' + path, {
+    ...opts, cache: 'no-store',
+    headers: { Authorization: 'Bearer ' + ghToken(), Accept: 'application/vnd.github+json', ...(opts.body ? { 'Content-Type': 'application/json' } : {}) },
+  });
+  if (!r.ok) { const e = new Error('GitHub ' + r.status); e.status = r.status; throw e; }
+  return r.status === 204 ? null : r.json();
+}
+async function findOrCreateGist() {
+  let id = localStorage.getItem(GH.gist);
+  if (id) return id;
+  for (let page = 1; page <= 10 && !id; page++) {
+    const list = await gh(`/gists?per_page=100&page=${page}`);
+    const g = list.find(x => x.files && x.files[GIST_FILE]);
+    if (g) { id = g.id; localStorage.setItem(GH.url, g.html_url); }
+    if (list.length < 100) break;
+  }
+  if (!id) {
+    const g = await gh('/gists', { method: 'POST', body: JSON.stringify({ description: GIST_DESC, public: false, files: { [GIST_FILE]: { content: JSON.stringify(exportAll(false)) } } }) });
+    id = g.id; localStorage.setItem(GH.url, g.html_url);
+  }
+  localStorage.setItem(GH.gist, id);
+  return id;
+}
+async function syncNow(manual = false, retried = false) {
+  if (!ghToken()) return;
+  if (!navigator.onLine) { syncError = 'Sin conexión: se sincronizará al volver la red'; setSyncStatus(); if (manual) toast('Sin conexión'); return; }
+  if (syncBusy) { syncAgain = true; return; }
+  syncBusy = true; clearTimeout(syncTimer); setSyncStatus('Sincronizando…');
+  try {
+    const id = await findOrCreateGist();
+    const g = await gh('/gists/' + id);
+    const f = g.files && g.files[GIST_FILE];
+    let remote = f ? f.content : null;
+    if (f && f.truncated) remote = await (await fetch(f.raw_url, { cache: 'no-store' })).text();
+    const before = JSON.stringify(exportAll(false));
+    if (remote) {
+      syncMuted = true;
+      try { mergeImport(JSON.parse(remote)); } catch { /* copia remota dañada: se reemplaza */ } finally { syncMuted = false; }
+    }
+    const out = JSON.stringify(exportAll(false));
+    if (out !== remote) await gh('/gists/' + id, { method: 'PATCH', body: JSON.stringify({ files: { [GIST_FILE]: { content: out } } }) });
+    syncDirty = false; syncError = '';
+    localStorage.setItem(GH.last, new Date().toISOString());
+    if (manual) toast('☁️ Sincronizado');
+    if (out !== before) refreshAfterSync();
+  } catch (e) {
+    if (e.status === 404 && !retried) { localStorage.removeItem(GH.gist); syncBusy = false; return syncNow(manual, true); } // Gist borrado: se crea otro
+    syncError = e.status === 401 ? 'El token no es válido o ha caducado. Vuelve a conectar.' : 'No se pudo sincronizar. Se reintentará.';
+    if (manual) toast('⚠️ ' + syncError);
+  } finally {
+    syncBusy = false; setSyncStatus();
+    if (syncAgain) { syncAgain = false; syncNow(); }
+  }
+}
+// Al cerrar o cambiar de app: subida rápida si hay cambios sin enviar
+function pushOnHide() {
+  const id = localStorage.getItem(GH.gist);
+  if (!syncDirty || !ghToken() || !id || !navigator.onLine) return;
+  const body = JSON.stringify({ files: { [GIST_FILE]: { content: JSON.stringify(exportAll(false)) } } });
+  try {
+    fetch('https://api.github.com/gists/' + id, { method: 'PATCH', keepalive: body.length < 60000, body, headers: { Authorization: 'Bearer ' + ghToken(), Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' } }).catch(() => {});
+    syncDirty = false;
+  } catch { /* se subirá en la próxima sincronización */ }
+}
+function refreshAfterSync() {
+  renderHeader(); renderStats();
+  if (P) return;                                  // no interrumpir una sesión
+  if (currentPage === 'pageRepaso' && activeReview) return; // ni un repaso en curso
+  renderPage(currentPage);
+}
+function setSyncStatus(busy) {
+  const on = !!ghToken();
+  const dot = $('syncDot');
+  dot.hidden = !on;
+  if (on) {
+    dot.textContent = busy ? '⟳' : syncError ? '⚠️' : syncDirty ? '☁️…' : '☁️✓';
+    dot.title = busy || syncError || (syncDirty ? 'Cambios pendientes de subir' : 'Sincronizado');
+  }
+  if (!$('syncState')) return;
+  $('syncSetup').hidden = on; $('syncOn').hidden = !on;
+  if (!on) { $('syncState').innerHTML = '<span class="muted">No conectado: el progreso solo está en este dispositivo.</span>'; return; }
+  const last = localStorage.getItem(GH.last), user = localStorage.getItem(GH.user), url = localStorage.getItem(GH.url);
+  const when = last ? new Date(last).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'nunca';
+  $('syncState').innerHTML = `<div><strong>✅ Conectado${user ? ' como ' + esc(user) : ''}</strong></div>
+    <div class="muted small">${busy ? esc(busy) : syncError ? '⚠️ ' + esc(syncError) : `Última sincronización: ${when}`}${url ? ` · <a href="${esc(url)}" target="_blank" rel="noopener">ver copia</a>` : ''}</div>`;
+}
+$('syncConnect').onclick = async () => {
+  const tok = $('syncToken').value.trim();
+  if (!tok) { toast('Pega primero el token'); return; }
+  localStorage.setItem(GH.token, tok);
+  $('syncConnect').disabled = true; $('syncConnect').textContent = 'Conectando…';
+  try {
+    const u = await gh('/user');
+    localStorage.setItem(GH.user, u.login);
+    $('syncToken').value = '';
+    syncDirty = true;
+    await syncNow();
+    if (syncError) throw new Error(syncError);
+    toast('☁️ Conectado. Tu progreso ya está en GitHub');
+  } catch (e) {
+    [GH.token, GH.user].forEach(k => localStorage.removeItem(k));
+    toast(e.status === 401 ? '⚠️ Token no válido' : '⚠️ No se pudo conectar: revisa el token (permiso "gist")');
+  } finally {
+    $('syncConnect').disabled = false; $('syncConnect').textContent = 'Conectar'; setSyncStatus();
+  }
+};
+$('syncNowBtn').onclick = () => syncNow(true);
+$('syncOff').onclick = () => {
+  if (!confirm('¿Desconectar este dispositivo? Tus datos se quedan aquí y en GitHub; solo deja de sincronizar.')) return;
+  Object.values(GH).forEach(k => localStorage.removeItem(k));
+  syncDirty = false; syncError = ''; setSyncStatus(); toast('Sincronización desactivada');
+};
+$('syncDot').onclick = () => switchPage('pageAjustes');
+window.addEventListener('online', () => syncNow());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') pushOnHide(); else syncNow(); });
 
 // =====================================================================
 // INIT
@@ -1164,3 +1351,5 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 renderAll();
 // Pide al navegador que no borre los datos de la app si falta espacio
 if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(ok => { if (!ok) navigator.storage.persist(); }).catch(() => {});
+setSyncStatus();
+syncNow();
