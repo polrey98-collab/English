@@ -231,11 +231,11 @@ details.card[open] > summary { margin-bottom: 12px; }
 .form { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
 .form label { font-size: 12px; font-weight: 700; color: var(--text-2); display: flex; flex-direction: column; gap: 5px; }
 .form textarea, .form input, .inp {
-  font: inherit; font-size: 15px; color: var(--text-1); background: var(--bg-card-alt);
+  font: inherit; font-size: 16px; color: var(--text-1); background: var(--bg-card-alt);
   border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 12px; outline: none; width: 100%;
 }
 .form textarea:focus, .form input:focus, .inp:focus { border-color: var(--accent); }
-.inp { width: auto; font-size: 14px; padding: 8px 10px; max-width: 170px; }
+.inp { width: auto; font-size: 16px; padding: 8px 10px; max-width: 170px; min-height: 40px; }
 .inp.num { width: 90px; }
 .inp.wide { width: 100%; max-width: none; margin-bottom: 12px; }
 .mine-list { margin-top: 6px; }
@@ -512,3 +512,12 @@ h3.sub-h { margin-top: 18px; }
 .done-stats { display: flex; justify-content: center; gap: 24px; margin: 16px 0; }
 .done-stats b { display: block; font-size: 28px; font-weight: 800; color: var(--accent); }
 .done-stats span { font-size: 11px; text-transform: uppercase; color: var(--text-3); font-weight: 700; }
+
+/* ========== MÓVIL: objetivos táctiles cómodos (≥ 40 px) ========== */
+.chip { min-height: 40px; padding: 8px 14px; }
+.speak { width: 40px; height: 40px; }
+.config-btn { min-height: 40px; padding: 10px 16px; }
+.link-btn { min-height: 40px; padding: 8px 6px; }
+.step-chip.done { background: var(--green-light); border-color: var(--green); color: var(--green); }
+.card.backup { border: 1.5px solid var(--amber); background: var(--amber-light); }
+.card.backup p { color: var(--text-2); margin-bottom: 10px; }

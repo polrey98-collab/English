@@ -28,7 +28,7 @@ const STEP_INFO = {
 
 const K = {
   days: 'en_days', legacy: 'en_tracker', progress: 'en_progress', srs: 'en_srs', custom: 'en_custom',
-  tests: 'en_level_tests', settings: 'en_settings',
+  tests: 'en_level_tests', settings: 'en_settings', resume: 'en_resume',
 };
 const DEFAULT_SETTINGS = { weekly: 5, newPerDay: 5, voice: 'en-GB', rate: 0.95 };
 
@@ -254,12 +254,15 @@ function renderStats() {
 // HOY
 // =====================================================================
 function renderToday() {
-  const t = todayKey(), day = getDay(t), next = nextSession(), s = getSettings();
+  const t = todayKey(), day = getDay(t), s = getSettings();
+  const res = getResume(), resSes = res && sessionById(res.sid);
+  const next = resSes && !getProgress().sessions[res.sid] ? resSes : nextSession();
+  const resuming = resSes && next === resSes;
   const doneToday = day.sessions.length > 0;
   const hasTest = getTests().length > 0;
   let html;
 
-  if (!hasTest && doneCount() === 0) {
+  if (!hasTest && doneCount() === 0 && !resuming) {
     html = `<div class="hero-kicker">Bienvenido 👋</div>
       <div class="hero-title">Empieza por el test de nivel</div>
       <p class="hero-sub">24 preguntas · 10 minutos. Te dice desde dónde partes y qué unidad te conviene.</p>
@@ -273,12 +276,12 @@ function renderToday() {
       <p class="hero-sub">Repite el test de nivel, rehaz las unidades con peor nota (pestaña Curso) y mantén el repaso diario.</p>
       <div class="hero-actions"><button type="button" class="btn primary" data-start="placement">📏 Repetir test de nivel</button></div>`;
   } else {
-    const steps = next.day.steps.map(st => `<span class="step-chip">${STEP_INFO[st].icon} ${STEP_INFO[st].name}</span>`).join('');
-    html = `<div class="hero-kicker">${doneToday ? '✅ Sesión de hoy hecha · ¿otra?' : 'Tu sesión de hoy'}</div>
+    const steps = next.day.steps.map((st, j) => `<span class="step-chip${resuming && j < res.i ? ' done' : ''}">${resuming && j < res.i ? '✓' : STEP_INFO[st].icon} ${STEP_INFO[st].name}</span>`).join('');
+    html = `<div class="hero-kicker">${resuming ? `⏸ A medias · paso ${res.i + 1} de ${next.day.steps.length}` : doneToday ? '✅ Sesión de hoy hecha · ¿otra?' : 'Tu sesión de hoy'}</div>
       <div class="hero-title">${next.unit.emoji} ${esc(next.unit.title)}</div>
-      <p class="hero-sub">Unidad ${next.ui + 1} · Sesión ${next.day.n}/5 — ${next.day.icon} ${esc(next.day.title)} · ≈ ${next.day.mins} min</p>
+      <p class="hero-sub">Unidad ${next.ui + 1} · Sesión ${next.day.n}/5 — ${next.day.icon} ${esc(next.day.title)} · ≈ ${next.day.mins} min · <strong>se puede hacer por partes</strong>: si sales, se guarda por dónde vas.</p>
       <div class="step-chips">${steps}</div>
-      <div class="hero-actions"><button type="button" class="btn primary big" data-start="${next.sid}">${doneToday ? 'Hacer la siguiente' : '▶ Empezar'}</button></div>`;
+      <div class="hero-actions"><button type="button" class="btn primary big" data-start="${next.sid}">${resuming ? '▶ Continuar' : doneToday ? 'Hacer la siguiente' : '▶ Empezar'}</button></div>`;
   }
   $('todayCard').innerHTML = html;
 
@@ -304,6 +307,9 @@ function renderToday() {
   $('goReview').onclick = () => switchPage('pageRepaso');
 
   renderMission();
+
+  const last = s.lastExport;
+  $('backupTip').hidden = !(doneCount() >= 3 && (!last || diffDays(last, t) >= 14));
 }
 
 let missionOffset = 0;
@@ -331,7 +337,7 @@ function renderCurso() {
        <p class="small">Aún no lo has hecho. 24 preguntas, 10 minutos: te dice desde dónde partes.</p>
        <button type="button" class="btn primary" data-start="placement">Hacer el test</button>`;
 
-  const p = getProgress(), next = nextSession();
+  const p = getProgress(), next = nextSession(), res = getResume();
   $('unitList').innerHTML = UNITS.map((u, ui) => {
     const ses = SESSIONS.filter(s => s.unit === u);
     const done = ses.filter(s => p.sessions[s.sid]).length;
@@ -348,9 +354,10 @@ function renderCurso() {
       </div>
       <div class="day-row">${ses.map(s => {
         const r = p.sessions[s.sid];
-        const cls = r ? 'done' : next && next.sid === s.sid ? 'next' : '';
+        const half = !r && res && res.sid === s.sid;
+        const cls = r ? 'done' : half || (next && next.sid === s.sid) ? 'next' : '';
         return `<button type="button" class="day-btn ${cls}" data-start="${s.sid}" title="${esc(s.day.title)}">
-          <span class="db-icon">${r ? '✓' : s.day.icon}</span><span class="db-n">${s.day.n}</span>
+          <span class="db-icon">${r ? '✓' : half ? '⏸' : s.day.icon}</span><span class="db-n">${s.day.n}</span>
           <span class="db-score">${r && typeof r.score === 'number' ? r.score + '%' : ''}</span></button>`;
       }).join('')}</div>
     </div>`;
@@ -600,23 +607,49 @@ function openPlayer(sid) {
     ses = sessionById(sid); if (!ses) return;
     unit = ses.unit; steps = ses.day.steps; title = `${unit.emoji} ${unit.title} · ${ses.day.icon} ${ses.day.title}`;
   }
-  P = { sid, ses, unit, steps, i: 0, start: Date.now(), graded: [], fails: 0, ended: false };
+  P = { sid, ses, unit, steps, i: 0, elapsed: 0, activeSince: Date.now(), graded: [], fails: 0, ended: false };
+  // ¿Sesión a medias? Se retoma en el paso donde la dejaste
+  const r = getResume();
+  if (r && r.sid === sid && r.i > 0 && r.i < steps.length) {
+    Object.assign(P, { i: r.i, elapsed: r.elapsed || 0, graded: r.graded || [], fails: r.fails || 0 });
+    toast(`▶ Retomando en el paso ${r.i + 1} de ${steps.length}`);
+  }
   $('playerTitle').textContent = title;
   $('player').hidden = false;
   document.body.classList.add('no-scroll');
+  history.pushState({ player: true }, '');
   renderStep();
 }
-function closePlayer(force) {
+function getResume() {
+  const r = store.get(K.resume, null);
+  return r && r.saved && diffDays(r.saved, todayKey()) <= 14 ? r : null;
+}
+function activeMs() { return P.elapsed + (P.activeSince ? Date.now() - P.activeSince : 0); }
+function saveResume() {
+  if (!P || P.ended || P.sid === 'placement') return;
+  store.set(K.resume, { sid: P.sid, i: P.i, elapsed: activeMs(), graded: P.graded.map(g => ({ ok: g.ok, total: g.total })), fails: P.fails, saved: todayKey() });
+}
+let ignorePop = false;
+function closePlayer(fromBack) {
   if (!P) return;
-  if (!force && !P.ended && P.i > 0 && !confirm('¿Salir de la sesión? El progreso de esta sesión no se guardará.')) return;
+  if (!P.ended && P.i > 0) { saveResume(); toast('💾 Guardado. Retomarás en el paso ' + (P.i + 1)); }
   stopSpeech(); stopRecording();
   activeReview = null;
   $('player').hidden = true;
   document.body.classList.remove('no-scroll');
   P = null;
+  if (!fromBack && history.state && history.state.player) { ignorePop = true; history.back(); }
   renderAll();
 }
 $('playerClose').onclick = () => closePlayer(false);
+// Botón "atrás" de Android: cierra la sesión (guardando) en vez de salir de la app
+window.addEventListener('popstate', () => { if (ignorePop) { ignorePop = false; return; } if (P) closePlayer(true); });
+// Si sales de la app, se pausa el cronómetro y se guarda por dónde vas
+document.addEventListener('visibilitychange', () => {
+  if (!P || P.ended) return;
+  if (document.visibilityState === 'hidden') { P.elapsed = activeMs(); P.activeSince = null; saveResume(); }
+  else if (!P.activeSince) P.activeSince = Date.now();
+});
 
 function setFoot(label, handler, hint = '') {
   const b = $('playerNext');
@@ -626,7 +659,7 @@ function setFoot(label, handler, hint = '') {
 function nextStep() {
   stopSpeech(); stopRecording();
   P.i++;
-  if (P.i >= P.steps.length) finishSession(); else renderStep();
+  if (P.i >= P.steps.length) finishSession(); else { saveResume(); renderStep(); }
 }
 function renderStep() {
   const st = P.steps[P.i];
@@ -902,7 +935,8 @@ const STEPS = {
 
 function finishSession() {
   P.ended = true;
-  const mins = clamp(Math.round((Date.now() - P.start) / 60000), 1, 90);
+  const mins = clamp(Math.round(activeMs() / 60000), 1, 90);
+  if (P.sid !== 'placement') localStorage.removeItem(K.resume);
   const ok = P.graded.reduce((s, r) => s + r.ok, 0), total = P.graded.reduce((s, r) => s + r.total, 0);
   const score = total ? Math.round(ok / total * 100) : null;
   const t = todayKey(), day = getDay(t);
@@ -916,7 +950,7 @@ function finishSession() {
     html = `<div class="done-screen"><div class="big">📏</div><h2>Tu nivel: <span class="cefr big">${pl.level}</span></h2>
       <p>${pl.ok}/${pl.total} correctas.</p><p class="small">${esc(recommendation(pl.level))}</p>
       <p class="muted small">Repítelo cada 2 unidades para ver tu evolución.</p></div>`;
-    setFoot('Ir al curso', () => { closePlayer(true); switchPage('pageCurso'); });
+    setFoot('Ir al curso', () => { closePlayer(false); switchPage('pageCurso'); });
   } else {
     const p = getProgress(), prev = p.sessions[P.sid];
     p.sessions[P.sid] = { date: t, score, mins, times: (prev?.times || 0) + 1, best: Math.max(prev?.best ?? -1, score ?? -1) };
@@ -932,7 +966,7 @@ function finishSession() {
       ${score !== null && score < 70 ? '<p class="small">💡 Por debajo del 70 %: repite esta sesión otro día antes de avanzar demasiado.</p>' : ''}
       ${nxt ? `<p class="muted small">Siguiente: ${nxt.unit.emoji} ${esc(nxt.unit.title)} · ${nxt.day.icon} ${esc(nxt.day.title)}</p>` : '<p><strong>🎓 ¡Has terminado el bloque!</strong></p>'}
     </div>`;
-    setFoot('Terminar', () => closePlayer(true));
+    setFoot('Terminar', () => closePlayer(false));
   }
   $('playerSteps').innerHTML = P.steps.map(s => `<span class="ps done">${STEP_INFO[s].icon}</span>`).join('');
   $('playerBody').innerHTML = html;
@@ -1042,6 +1076,7 @@ $('exportBtn').onclick = () => {
   a.href = url; a.download = `en_c1_${todayKey()}.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+  saveSettings({ lastExport: todayKey() });
   toast('Datos exportados ✓');
 };
 $('importBtn').onclick = () => $('fileInput').click();
@@ -1127,3 +1162,5 @@ function renderAll() { renderHeader(); renderStats(); renderPage(currentPage); }
 
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !P) renderAll(); });
 renderAll();
+// Pide al navegador que no borre los datos de la app si falta espacio
+if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(ok => { if (!ok) navigator.storage.persist(); }).catch(() => {});

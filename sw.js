@@ -1,5 +1,5 @@
 // Service worker: la app funciona sin conexión y se actualiza sola cuando hay red.
-const CACHE = 'en-c1-v3';
+const CACHE = 'en-c1-v4';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './content.js', './course.js', './manifest.webmanifest',
   './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',

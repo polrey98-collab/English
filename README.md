@@ -25,6 +25,7 @@ Curso propio y completo dentro de la web: **no depende de apps externas**. Funci
   4. 🗣️ Vocabulario en contexto + speaking con la técnica 4/3/2 y grabación
   5. ✍️ Writing con checklist y texto modelo + test de unidad
 - **Repaso con repetición espaciada**: ~200 tarjetas (falsos amigos, errores típicos, collocations, phrasal verbs, linkers, gramática C1, inglés de trabajo) más el vocabulario de cada unidad. **Los ejercicios que falles se añaden solos** y vuelven hasta que los domines.
+- **Pensada para el móvil**: las sesiones se pueden hacer por partes (si sales o te llaman, se guarda el paso y retomas con "Continuar"). El botón Atrás de Android no te saca de la app, y te recuerda hacer copia de tus datos.
 - **Progreso**: racha, sesiones, horas, acierto por unidad, evolución del test de nivel, fecha estimada para terminar y mapa de actividad.
 
 ## Usarla desde el móvil y el PC
