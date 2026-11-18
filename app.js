@@ -1117,7 +1117,7 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 // INIT
 // =====================================================================
 function renderPage(id) {
-  if (id === 'pageHoy') renderToday();
+  if (id === 'pageHoy') { renderToday(); if (typeof renderFlowCard === 'function') renderFlowCard(); }
   else if (id === 'pageCurso') renderCurso();
   else if (id === 'pageRepaso') renderRepaso();
   else if (id === 'pageProgreso') renderProgreso();
@@ -1125,5 +1125,5 @@ function renderPage(id) {
 }
 function renderAll() { renderHeader(); renderStats(); renderPage(currentPage); }
 
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !P) renderAll(); });
-renderAll();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !P && !(typeof F !== 'undefined' && F)) renderAll(); });
+window.addEventListener('DOMContentLoaded', renderAll);

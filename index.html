@@ -53,6 +53,7 @@
 
   <!-- ===================== HOY ===================== -->
   <section class="page active" id="pageHoy">
+    <div class="card fl-card" id="flowCard"></div>
     <div class="card hero" id="todayCard"></div>
 
     <div class="card">
@@ -212,7 +213,7 @@
       <p class="muted small">Funciona sin conexión una vez abierta. Para grabarte, el navegador te pedirá permiso de micrófono.</p>
     </div>
 
-    <div class="foot">EN C1 v3.0 · Curso propio</div>
+    <div class="foot">EN C1 v3.1 · Curso propio + Flow</div>
   </section>
 </main>
 
@@ -232,6 +233,19 @@
       <button type="button" class="btn primary" id="playerNext">Continuar</button>
     </div>
   </div>
+</div>
+
+<!-- ===================== FLOW (micro-rondas) ===================== -->
+<div class="flow" id="flow" hidden>
+  <div class="flow-top wrap">
+    <button type="button" class="icon-btn" id="flowClose" aria-label="Close">✕</button>
+    <div class="flow-track"><div class="flow-bar" id="flowBar"></div></div>
+    <div class="flow-combo" id="flowCombo"></div>
+    <div class="flow-xp" id="flowXp"></div>
+  </div>
+  <div class="flow-body wrap" id="flowBody"></div>
+  <div class="flow-foot"><div class="wrap flow-foot-inner" id="flowFoot"></div></div>
+  <div class="fl-feedback" id="flowFeedback"></div>
 </div>
 
 <!-- TOAST -->
@@ -281,5 +295,7 @@
 <script src="content.js"></script>
 <script src="course.js"></script>
 <script src="app.js"></script>
+<script src="flow-content.js"></script>
+<script src="flow.js"></script>
 </body>
 </html>

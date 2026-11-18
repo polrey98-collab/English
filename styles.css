@@ -512,3 +512,81 @@ h3.sub-h { margin-top: 18px; }
 .done-stats { display: flex; justify-content: center; gap: 24px; margin: 16px 0; }
 .done-stats b { display: block; font-size: 28px; font-weight: 800; color: var(--accent); }
 .done-stats span { font-size: 11px; text-transform: uppercase; color: var(--text-3); font-weight: 700; }
+
+/* =====================================================================
+   FLOW — micro-rondas tipo Duolingo
+   ===================================================================== */
+.fl-card { border: 2px solid var(--accent-border); background: linear-gradient(135deg, var(--accent-light), var(--bg-card)); }
+.fl-card-row { display: flex; align-items: center; gap: 14px; justify-content: space-between; }
+.fl-card-title { font-size: 19px; font-weight: 800; margin: 4px 0 2px; }
+.fl-goal { margin-top: 12px; }
+.fl-goal-bar { height: 10px; border-radius: 99px; background: var(--bg-card-alt); overflow: hidden; margin-bottom: 4px; }
+.fl-goal-bar > div { height: 100%; background: var(--green); border-radius: 99px; transition: width .4s; }
+#offlineStatus { margin-top: 6px; }
+
+.flow { position: fixed; inset: 0; z-index: 160; background: var(--bg); display: flex; flex-direction: column; }
+.flow[hidden] { display: none; }
+.flow-top { display: flex; align-items: center; gap: 10px; padding: calc(12px + var(--safe-top)) 14px 10px; width: 100%; }
+.flow-track { flex: 1; height: 14px; background: var(--bg-card-alt); border-radius: 99px; overflow: hidden; }
+.flow-bar { height: 100%; width: 0; background: var(--green); border-radius: 99px; transition: width .35s ease; }
+.flow-combo { font-weight: 800; color: var(--amber); font-size: 14px; min-width: 34px; text-align: right; }
+.flow-xp { font-weight: 800; color: var(--accent); font-size: 13px; white-space: nowrap; }
+.flow-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 18px 30px; width: 100%; }
+.flow-foot { padding: 12px 16px calc(14px + var(--safe-bottom)); border-top: 1px solid var(--border); background: var(--bg); }
+.flow-foot-inner { display: flex; gap: 10px; }
+.flow-foot-inner .btn { flex: 1; }
+.flow-foot-inner:empty { min-height: 0; }
+
+.fl-kicker { font-size: 13px; font-weight: 800; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 12px; }
+.fl-prompt { margin-bottom: 18px; }
+.fl-def { font-size: 22px; font-weight: 700; line-height: 1.35; }
+.fl-sent { font-size: 20px; font-weight: 600; line-height: 1.45; }
+.fl-story { font-size: 17px; line-height: 1.6; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+.fl-q { font-size: 16px; font-weight: 600; margin-top: 10px; line-height: 1.5; }
+.fl-q.muted, .fl-fb-text.muted { color: var(--text-3); font-weight: 500; font-size: 14px; }
+.fl-big { font-size: 38px; font-weight: 900; text-align: center; margin: 24px 0 8px; }
+.fl-ban { display: inline-block; background: var(--red-light); color: var(--red); border-radius: 8px; padding: 2px 9px; margin: 3px 2px; font-weight: 700; text-decoration: line-through; }
+.fl-timer { text-align: center; font-size: 30px; font-weight: 800; color: var(--accent); margin-top: 20px; }
+
+.fl-opts { display: grid; gap: 10px; }
+.fl-opt { text-align: left; font: inherit; font-size: 17px; font-weight: 600; color: var(--text-1); background: var(--bg-card); border: 2px solid var(--border); border-bottom-width: 4px; border-radius: 14px; padding: 15px 16px; cursor: pointer; transition: transform .08s; }
+.fl-opts.small .fl-opt { font-size: 15px; padding: 12px 14px; }
+.fl-opt:active { transform: translateY(2px); }
+.fl-opt.right { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.fl-opt.wrong { border-color: var(--red); background: var(--red-light); color: var(--red); animation: fl-shake .3s; }
+.fl-opt:disabled { cursor: default; }
+
+.fl-line { min-height: 64px; border-bottom: 2px solid var(--border); padding: 8px 0; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; margin-bottom: 18px; }
+.fl-line.right { border-color: var(--green); }
+.fl-line.wrong { border-color: var(--red); animation: fl-shake .3s; }
+.fl-tiles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.fl-tile { font: inherit; font-size: 17px; font-weight: 600; color: var(--text-1); background: var(--bg-card); border: 2px solid var(--border); border-bottom-width: 4px; border-radius: 12px; padding: 9px 13px; cursor: pointer; }
+.fl-tile.used { visibility: hidden; }
+.fl-tile.in { background: var(--accent-light); border-color: var(--accent-border); }
+
+.fl-audio { display: flex; gap: 12px; justify-content: center; margin: 4px 0 20px; }
+.fl-play { font-size: 34px; width: 84px; height: 84px; border-radius: 22px; border: none; background: var(--accent); color: #fff; cursor: pointer; border-bottom: 5px solid rgba(0,0,0,.2); }
+.fl-play.slow { font-size: 24px; width: 60px; height: 60px; align-self: flex-end; background: var(--accent-light); }
+.fl-back { margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--border); }
+.btn.fl-no { background: var(--red-light); color: var(--red); }
+
+.fl-feedback { position: fixed; left: 0; right: 0; bottom: 0; z-index: 170; padding: 18px 18px calc(18px + var(--safe-bottom)); transform: translateY(100%); transition: transform .22s ease; }
+.fl-feedback.show { transform: none; }
+.fl-feedback.ok { background: var(--green-light); }
+.fl-feedback.ko { background: var(--red-light); }
+.fl-fb-title { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
+.fl-feedback.ok .fl-fb-title { color: var(--green); }
+.fl-feedback.ko .fl-fb-title { color: var(--red); }
+.fl-fb-text { font-size: 15px; margin-bottom: 6px; line-height: 1.45; }
+.btn.fl-go { width: 100%; margin-top: 10px; background: var(--green); color: #fff; }
+.btn.fl-go.ko { background: var(--red); }
+
+.fl-end { text-align: center; padding-top: 30px; }
+.fl-end-emoji { font-size: 64px; }
+.fl-end-title { font-size: 26px; font-weight: 900; margin: 8px 0 20px; }
+.fl-end-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 22px; }
+.fl-end-stats div { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 12px 4px; }
+.fl-end-stats b { display: block; font-size: 22px; }
+.fl-end-stats span { font-size: 11px; color: var(--text-3); font-weight: 700; text-transform: uppercase; }
+@keyframes fl-shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@media (max-width: 420px) { .fl-card-row { flex-direction: column; align-items: stretch; } }
